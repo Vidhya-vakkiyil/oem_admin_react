@@ -45,6 +45,7 @@ import Accounting from "./Accounting";
 import Attachments from "./Attachments";
 import UserdefinedFields from "./UserdefinedFields";
 import { useNavigate } from "react-router-dom";
+import CustomerSelection from "./Header/CustomerSelection";
 
 export default function SalesOrder() {
   const { fieldConfig, CustomerDetails, DocumentDetails } =
@@ -62,8 +63,12 @@ export default function SalesOrder() {
     U_Test1: "",
     U_Test2: "",
   });
-  const buttonRef = useRef(null);
-  const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const menuRef = useRef();
+
+  const openMenu = (e) => {
+    menuRef.current.open = true;
+    menuRef.current.opener = e.currentTarget;
+  };
   const handleChange = (e, name) => {
     const value = e.target.value;
 
@@ -167,7 +172,6 @@ export default function SalesOrder() {
           <FlexBox wrap="Wrap">
             <FlexBox direction="Column">
               <Label>Customer</Label>
-             
             </FlexBox>
             <span style={{ width: "4rem" }} />
             <FlexBox direction="Column">
@@ -209,21 +213,23 @@ export default function SalesOrder() {
       }}
       titleArea={
         <ObjectPageTitle
-        
           breadcrumbs={
+            <>
+              
             <Breadcrumbs>
               <BreadcrumbsItem>Home</BreadcrumbsItem>
               <BreadcrumbsItem onClick={navigate("/")}>
                 Manage Sales Order
               </BreadcrumbsItem>
               <BreadcrumbsItem>Sales Order</BreadcrumbsItem>
-            </Breadcrumbs>
+            </Breadcrumbs></>
           }
           header={<Title level="H2">Sales Order</Title>}
           navigationBar={
             <Toolbar design="Transparent">
               <ToolbarButton design="Transparent" icon="full-screen" />
               <ToolbarButton design="Transparent" icon="exit-full-screen" />
+              
               
               <ToolbarButton
                 onClick={() => navigate("/")}
@@ -233,7 +239,13 @@ export default function SalesOrder() {
             </Toolbar>
           }
         >
-          <ObjectStatus>1316</ObjectStatus>
+          <ObjectStatus>1316
+            <Button design="Transparent" icon="navigation-right-arrow"  onClick={openMenu} >
+                 Company
+              </Button>
+            <CustomerSelection menuRef={menuRef}/>
+            
+              </ObjectStatus>
         </ObjectPageTitle>
       }
     >
