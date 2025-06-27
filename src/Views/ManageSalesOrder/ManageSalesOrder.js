@@ -192,7 +192,7 @@ const ManageSalesOrder = () => {
                             //loading={isLoading}
                             //showOverlay={isLoading}
                             noDataText={
-                              "You have not createdany sales order yet"
+                              "You have not created any sales order yet"
                             }
                             sortable
                             filterable

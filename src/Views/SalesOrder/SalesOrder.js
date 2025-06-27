@@ -40,12 +40,12 @@ import axios from "axios";
 import { SalesOrderRenderInput } from "./SalesOrderRenderInput";
 import General from "./General/General";
 import Contents from "./Contents/Contents";
-import Logistics from "./Logistics";
-import Accounting from "./Accounting";
-import Attachments from "./Attachments";
+import Logistics from "./Logistics/Logistics";
 import UserdefinedFields from "./UserdefinedFields";
 import { useNavigate } from "react-router-dom";
 import CustomerSelection from "./Header/CustomerSelection";
+import Accounting from "./Accounting/Accounting";
+import Attachments from "./Attachments/Attachments";
 
 export default function SalesOrder() {
   const { fieldConfig, CustomerDetails, DocumentDetails } =

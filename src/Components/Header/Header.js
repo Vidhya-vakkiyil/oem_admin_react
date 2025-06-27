@@ -19,30 +19,31 @@ const Header = () => {
      const handleProductSwitchClick=()=>{
       navigate("/Admin")
      }
+     const handleLogoClick = () => {
+      navigate("/");
+     }
   return (
     <div className="sapTntToolPageHeaderWrapper dark">
       <div className="sapTntToolHeader sapMTB ui5-shellbar-root dark">
         <ShellBar
           logo={
-            <img
+            <img 
               alt="SAP Logo"
               src="https://sap.github.io/ui5-webcomponents/images/sap-logo-svg.svg"
             />
           }
           notificationsCount="10"
           onContentItemVisibilityChange={function Xs() {}}
-          onLogoClick={function Xs() {}}
+          onLogoClick={handleLogoClick}
           onMenuItemClick={function Xs() {}}
           onNotificationsClick={function Xs() {}}
           onProfileClick={function Xs() {}}
           onSearchButtonClick={function Xs() {}}
           onSearchFieldToggle={function Xs() {}}
           primaryTitle="Shell Bar"
-           menuItems={<>
-                 </>}
           profile={
-            <Avatar>
-              <img
+            <Avatar >
+              <img 
                 alt="person-placeholder"
                 src="https://sap.github.io/ui5-webcomponents-react/v2/assets/Person-B7wHqdJw.png"
               />
