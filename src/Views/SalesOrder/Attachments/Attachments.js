@@ -9,6 +9,7 @@ import {
   UploadCollectionItem,
 } from "@ui5/webcomponents-react";
 import AddAttachmentDialogPage from "./AddAttachmentDialogPage";
+import SelectedAttachmentDialog from "./SelectedAttachmentDialog";
 
 const data = [
   {
@@ -49,7 +50,13 @@ const Attachments = () => {
         alignItems="Center"
         style={{ width: "100%", marginBottom: "1rem" }}
       >
-        <Title level="H5">Attachments</Title>
+         <label
+          style={{
+            fontWeight: "bold", // makes text bold
+            textAlign: "left", // ensures it can align right
+            display: "block", // needed for textAlign to work
+          }}
+        >Attachments</label>
         <Button icon="add" design="Emphasized" onClick={handleAddAttachment}>
           Add
         </Button>
@@ -67,42 +74,15 @@ const Attachments = () => {
           />
         ))}
       </UploadCollection>
-      <Dialog
-        headerText="Selected Attachment"
-        open={openAttachmentDialog}
-        // style={{ width: "100px" }}
-        onAfterClose={() => setOpenAttachmentDialog(false)}
-        footer={
-          <Button onClick={() => setOpenAttachmentDialog(false)}>Close</Button>
-        }
-      >
-        <UploadCollection
-          onDrop={function Xs() {}}
-          onItemDelete={function Xs() {}}
-          onSelectionChange={function Xs() {}}
-          selectionMode="None"
-        />
-      </Dialog>
-      <Dialog
-        headerText="Selected Attachment"
-        open={openAddAttachmentDialog}
-        // style={{ width: "100px" }}
-        onAfterClose={() => setOpenAddAttachmentDialog(false)}
-        footer={
-          <FlexBox><Button onClick={() => setOpenAddAttachmentDialog(false)}>
-            Close
-          </Button>
-          <Button onClick={() => setOpenAddAttachmentDialog(false)}></Button>Save</FlexBox>
-        }
-      >
-        <FileUploader
-          onChange={function Xs() {}}
-          onFileSizeExceed={function Xs() {}}
-          valueState="None"
-        >
-          <Button>Upload single file</Button>
-        </FileUploader>
-      </Dialog>
+     <SelectedAttachmentDialog
+        openAttachmentDialog={openAttachmentDialog}   
+        setOpenAttachmentDialog={setOpenAttachmentDialog}
+        attachments={attachments}
+        setAttachments={setAttachments}
+      />
+      <AddAttachmentDialogPage
+      openAddAttachmentDialog={openAddAttachmentDialog}
+      setOpenAddAttachmentDialog={setOpenAddAttachmentDialog}/>
     </div>
   );
 };

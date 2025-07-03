@@ -17,9 +17,12 @@ const Header = () => {
    const [fioriTheme, setFioriTheme] = useState("sap_fiori_3");
        const navigate = useNavigate();
      const handleProductSwitchClick=()=>{
-      navigate("/Admin")
+      navigate("/admin")
      }
      const handleLogoClick = () => {
+      navigate("/");
+     }
+     const logout=()=>{
       navigate("/");
      }
   return (
@@ -37,7 +40,7 @@ const Header = () => {
           onLogoClick={handleLogoClick}
           onMenuItemClick={function Xs() {}}
           onNotificationsClick={function Xs() {}}
-          onProfileClick={function Xs() {}}
+          onProfileClick={logout}
           onSearchButtonClick={function Xs() {}}
           onSearchFieldToggle={function Xs() {}}
           primaryTitle="Shell Bar"

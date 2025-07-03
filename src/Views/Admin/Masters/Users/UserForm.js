@@ -5,7 +5,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { fetchRoles } from "../../../../store/slices/roleSlice";
 import { useDispatch, useSelector } from "react-redux";
-import AssignBranch from "./AssignBranch";
 import {
   Bar,
   Breadcrumbs,
@@ -162,7 +161,7 @@ const UserForm = ({
     >
       {apiError && (
         <MessageStrip
-          design="Negative" // Corresponds to MUI's "error"
+          design="Negative" 
           hideCloseButton={false}
           hideIcon={false}
           style={{ marginBottom: "1rem" }}

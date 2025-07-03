@@ -16,78 +16,72 @@ import { lazy } from "react";
 import Loadable from "../../../../ui-component/Loadable";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchForm, deleteForm } from "../../../../store/slices/formmasterSlice";
 import { useNavigate } from "react-router-dom";
-import {
-  deleteCompany,
-  fetchCompanies,
-} from "../../../../store/slices/companiesSlice";
+import Admin from "../../Admin";
+const ViewFormMaster = Loadable(lazy(() => import("./ViewFormMaster")));
 
-const ViewCompany = Loadable(lazy(() => import("./ViewCompany")));
-
-const Companies = () => {
+const FormMaster = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { companies, loading } = useSelector((state) => state.companies);
+  const { forms, loading } = useSelector((state) => state.forms);
   const [search, setSearch] = useState("");
   const [layout, setLayout] = useState("OneColumn");
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchCompanies());
+    dispatch(fetchForm());
   }, [dispatch]);
-  const handleDelete = async (company) => {
-    if (window.confirm(`Are you sure to delete user: ${company.name}?`)) {
+  const handleDelete = async (form) => {
+    if (
+      window.confirm(
+        `Are you sure to delete form: ${form.name}?`
+      )
+    ) {
       try {
-        await dispatch(deleteCompany(company.id)).unwrap();
+        await dispatch(deleteForm(form.id)).unwrap();
       } catch (error) {
-        console.error("Error deleting company:", error);
+        console.error("Error deleting form:", error);
       }
     }
   };
 
-  const handleEdit = (company) => {
-    navigate(`/admin/companies/edit/${company.id}`);
+  const handleEdit = (form) => {
+    navigate(`/admin/FormMaster/edit/${form.id}`);
   };
 
-  const handleView = (company) => {
-    //navigate(`/users/${user.id}`);
-    setViewId(company.id);
+  const handleView = (form) => {
+    //navigate(`/FormMaster/${form.id}`);
+    console.log("form", form);
+    setViewId(form.id);
   };
 
-  const filteredRows = companies?.filter(
-    (company) =>
-      company.name.toLowerCase().includes(search.toLowerCase()) ||
-      company.company_code.toLowerCase().includes(search.toLowerCase()) ||
-      company.city.toLowerCase().includes(search.toLowerCase())
+  const filteredRows = forms&&forms?.filter(
+    (form) =>
+      form.name.toLowerCase().includes(search.toLowerCase()) ||
+      form.display_name.toLowerCase().includes(search.toLowerCase()) 
   );
-  const editRow = (row) => {
-    console.log("Edit Row:", row);
-  };
+
   const columns = useMemo(
     () => [
       {
-        Header: "Company Name",
+        Header: "Form Name",
         accessor: "name",
       },
       {
-        Header: "City",
-        accessor: "city",
+        Header: "Display Name",
+        accessor: "display_name",
       },
-      {
-        Header: "Address",
-        accessor: "address",
-      },
-      
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ row }) =>
-          row.original.status === 1 ? (
-            <Tag children="Active" design="Positive" size="S" />
-          ) : (
-            <Tag children="Inactive" design="Negative" size="S" />
-          ),
-      },
+        {
+              Header: "Status",
+              accessor: "status",
+              Cell: ({ row }) =>
+                row.original.status === 1 ? (
+                  <Tag children="Active" design="Positive" size="S" />
+                ) : (
+                  <Tag children="Inactive" design="Negative" size="S" />
+                ),
+            },
       {
         Header: "Actions",
         accessor: ".",
@@ -151,8 +145,8 @@ const Companies = () => {
                 }}
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/companies">
-                  company
+                <BreadcrumbsItem data-route="/admin/FormMaster">
+                  FormMaster
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
@@ -160,13 +154,13 @@ const Companies = () => {
           endContent={
             <Button
               design="Emphasized"
-              onClick={() => navigate("/admin/companies/create")}
+              onClick={() => navigate("/admin/FormMaster/create")}
             >
-              Add Company
+              Add Form
             </Button>
           }
         >
-          <Title level="H4">Company List</Title>
+          <Title level="H4">Form List</Title>
         </Bar>
       }
     >
@@ -201,10 +195,11 @@ const Companies = () => {
               <FlexBox direction="Column">
                 <div>
                   <FlexBox direction="Column">
+                    {console.log("filteredRows", filteredRows)}
                     <AnalyticalTable
                       columns={columns}
                       data={filteredRows || []}
-                      header={"  Companies list(" + filteredRows.length + ")"}
+                      header={"  FormMaster list(" + filteredRows.length + ")"}
                       visibleRows={5}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
@@ -231,7 +226,7 @@ const Companies = () => {
                         onClick={() => setLayout("OneColumn")}
                       />
                     }
-                    startContent={<Title level="H5">Preview Company</Title>}
+                    startContent={<Title level="H5">Preview FormMaster</Title>}
                   ></Bar>
                 }
               >
@@ -245,7 +240,7 @@ const Companies = () => {
                     verticalAlign: "middle",
                   }}
                 >
-                  <ViewCompany id={ViewId} />
+                  <ViewFormMaster id={ViewId} />
                 </div>
               </Page>
             }
@@ -256,4 +251,5 @@ const Companies = () => {
   );
 };
 
-export default Companies;
+export default FormMaster;
+

@@ -17,67 +17,72 @@ import Loadable from "../../../../ui-component/Loadable";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import Admin from "../../Admin";
 import {
-  deleteCompany,
-  fetchCompanies,
-} from "../../../../store/slices/companiesSlice";
+  fetchCompanyForms,
+  deleteCompanyForms,
+} from "../../../../store/slices/CompanyFormSlice";
+const ViewCompanyMaster = Loadable(lazy(() => import("./ViewCompanyMaster")));
 
-const ViewCompany = Loadable(lazy(() => import("./ViewCompany")));
-
-const Companies = () => {
+const CompanyMaster = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { companies, loading } = useSelector((state) => state.companies);
+  const { companyforms, loading } = useSelector((state) => state.companyforms);
   const [search, setSearch] = useState("");
   const [layout, setLayout] = useState("OneColumn");
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchCompanies());
+    dispatch(fetchCompanyForms());
   }, [dispatch]);
-  const handleDelete = async (company) => {
-    if (window.confirm(`Are you sure to delete user: ${company.name}?`)) {
+  const handleDelete = async (companyform) => {
+    if (
+      window.confirm(
+        `Are you sure to delete user: ${companyform.companyId}?`
+      )
+    ) {
       try {
-        await dispatch(deleteCompany(company.id)).unwrap();
+        await dispatch(deleteCompanyForms(companyform.id)).unwrap();
       } catch (error) {
-        console.error("Error deleting company:", error);
+        console.error("Error deleting user:", error);
       }
     }
   };
 
-  const handleEdit = (company) => {
-    navigate(`/admin/companies/edit/${company.id}`);
+  const handleEdit = (user) => {
+    navigate(`/admin/company-forms/edit/${user.id}`);
   };
 
-  const handleView = (company) => {
-    //navigate(`/users/${user.id}`);
-    setViewId(company.id);
+  const handleView = (user) => {
+    //navigate(`/company-forms/${user.id}`);
+    setViewId(user.id);
   };
-
-  const filteredRows = companies?.filter(
-    (company) =>
-      company.name.toLowerCase().includes(search.toLowerCase()) ||
-      company.company_code.toLowerCase().includes(search.toLowerCase()) ||
-      company.city.toLowerCase().includes(search.toLowerCase())
+  {
+    console.log("companyforms", companyforms);
+  }
+  const filteredRows = companyforms?.filter(
+    (companyform) =>
+      companyform.Company?.name.toLowerCase().includes(search.toLowerCase()) ||
+      companyform.Form?.name.toLowerCase().includes(search.toLowerCase()) ||
+      companyform.form_type.toLowerCase().includes(search.toLowerCase())
   );
-  const editRow = (row) => {
-    console.log("Edit Row:", row);
-  };
+
   const columns = useMemo(
     () => [
       {
         Header: "Company Name",
-        accessor: "name",
+        accessor: "company_name",
+        Cell: ({ row }) => row.original.Company?.name || "N/A",
       },
       {
-        Header: "City",
-        accessor: "city",
+        Header: "Form Name",
+        accessor: "form_name",
+        Cell: ({ row }) => row.original.Form?.display_name || "N/A",
       },
       {
-        Header: "Address",
-        accessor: "address",
+        Header: "Form Type",
+        accessor: "form_type",
       },
-      
       {
         Header: "Status",
         accessor: "status",
@@ -141,7 +146,7 @@ const Companies = () => {
         <Bar
           design="Header"
           startContent={
-            <div style={{ width: "150px" }}>
+            <div style={{ width: "200px" }}>
               <Breadcrumbs
                 design="Standard"
                 separators="Slash"
@@ -151,8 +156,8 @@ const Companies = () => {
                 }}
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/companies">
-                  company
+                <BreadcrumbsItem data-route="/admin/company-forms">
+                  CompanyForms
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
@@ -160,13 +165,13 @@ const Companies = () => {
           endContent={
             <Button
               design="Emphasized"
-              onClick={() => navigate("/admin/companies/create")}
+              onClick={() => navigate("/admin/company-forms/create")}
             >
-              Add Company
+              Add 
             </Button>
           }
         >
-          <Title level="H4">Company List</Title>
+          <Title level="H4">Company Form List</Title>
         </Bar>
       }
     >
@@ -204,7 +209,7 @@ const Companies = () => {
                     <AnalyticalTable
                       columns={columns}
                       data={filteredRows || []}
-                      header={"  Companies list(" + filteredRows.length + ")"}
+                      header={"  Company Forms List(" + filteredRows.length + ")"}
                       visibleRows={5}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
@@ -231,7 +236,7 @@ const Companies = () => {
                         onClick={() => setLayout("OneColumn")}
                       />
                     }
-                    startContent={<Title level="H5">Preview Company</Title>}
+                    startContent={<Title level="H5">Preview Company Form</Title>}
                   ></Bar>
                 }
               >
@@ -245,7 +250,7 @@ const Companies = () => {
                     verticalAlign: "middle",
                   }}
                 >
-                  <ViewCompany id={ViewId} />
+                  <ViewCompanyMaster id={ViewId} />
                 </div>
               </Page>
             }
@@ -256,4 +261,4 @@ const Companies = () => {
   );
 };
 
-export default Companies;
+export default CompanyMaster;
