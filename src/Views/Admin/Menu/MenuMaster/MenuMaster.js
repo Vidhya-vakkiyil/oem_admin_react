@@ -16,77 +16,88 @@ import { lazy } from "react";
 import Loadable from "../../../../ui-component/Loadable";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers, deleteUser } from "../../../../store/slices/usersSlice";
-import { useNavigate } from "react-router-dom";
-import Admin from "../../Admin";
-const ViewFormFields = Loadable(lazy(() => import("./ViewFormFields")));
 
-const FormFields = () => {
+import { useNavigate } from "react-router-dom";
+import { deleteForm, fetchForm } from "../../../../store/slices/formmasterSlice";
+const ViewMenuMaster = Loadable(lazy(() => import("./ViewMenuMaster")));
+
+const MenuMaster = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { users, loading } = useSelector((state) => state.users);
+  const { forms, loading } = useSelector((state) => state.forms);
   const [search, setSearch] = useState("");
   const [layout, setLayout] = useState("OneColumn");
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchUsers());
+    dispatch(fetchForm());
   }, [dispatch]);
-  const handleDelete = async (user) => {
-    if (
-      window.confirm(
-        `Are you sure to delete user: ${user.first_name} ${user.last_name}?`
-      )
-    ) {
+  const handleDelete = async (menu) => {
+    if (window.confirm(`Are you sure to delete menu: ${menu.name}?`)) {
       try {
-        await dispatch(deleteUser(user.id)).unwrap();
+        const res = await dispatch(deleteForm(menu.id)).unwrap();
+        if (res.message === "Please Login!") {
+          navigate("/login");
+        }
       } catch (error) {
-        console.error("Error deleting user:", error);
+        console.error("Error deleting menu:", error);
       }
     }
   };
 
-  const handleEdit = (user) => {
-    navigate(`/admin/FormFields/edit/${user.id}`);
+  const handleEdit = (menu) => {
+    navigate(`/admin/MenuMaster/edit/${menu.id}`);
   };
 
-  const handleView = (user) => {
-    //navigate(`/FormFields/${user.id}`);
-    setViewId(user.id);
+  const handleView = (menu) => {
+    //navigate(`/MenuMaster/${menu.id}`);
+    console.log("menu", menu);
+    setViewId(menu.id);
   };
 
-  const filteredRows = users?.filter(
-    (user) =>
-      user.first_name.toLowerCase().includes(search.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRows =
+    forms &&
+    forms?.filter(
+      (menu) =>
+        menu.name.toLowerCase().includes(search.toLowerCase()) ||
+        menu.display_name.toLowerCase().includes(search.toLowerCase())
+    );
 
   const columns = useMemo(
     () => [
       {
-        Header: "Form Name",
-        accessor: "form_name",
+        Header: "Menu Name",
+        accessor: "name",
       },
       {
-        Header: "Form Section",
-        accessor: "form_section",
+        Header: "Display Name",
+        accessor: "display_name",
+      }, 
+      {
+        Header: "Parent",
+        accessor: "parent",
+      },
+       {
+        Header: "Order No",
+        accessor: "orderno",
       },
       {
-        Header: "Field Name",
-        accessor: "form_field_name",
-      },{
-        Header: "Field Display Name",
-        accessor: "field_display_name",
-      },{
-        Header: "Field Type",
-        accessor: "field_type",
-      },{
-        Header: "Field Order",
-        accessor: "field_order",
-      },{
-        Header: "Field data type",
-        accessor: "field_data_type",
+        Header: "Form",
+        accessor: "form",
+      },
+      {
+        Header: "Deletable",
+        accessor: "deetable",
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+        Cell: ({ row }) =>
+          row.original.status === 1 ? (
+            <Tag children="Active" design="Positive" size="S" />
+          ) : (
+            <Tag children="Inactive" design="Negative" size="S" />
+          ),
       },
       {
         Header: "Actions",
@@ -151,8 +162,8 @@ const FormFields = () => {
                 }}
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/FormFields">
-                  FormFields
+                <BreadcrumbsItem data-route="/admin/MenuMaster">
+                  MenuMaster
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
@@ -160,13 +171,13 @@ const FormFields = () => {
           endContent={
             <Button
               design="Emphasized"
-              onClick={() => navigate("/admin/FormFields/create")}
+              onClick={() => navigate("/admin/MenuMaster/create")}
             >
-              Add Form Field
+              Add Menu
             </Button>
           }
         >
-          <Title level="H4">Form Field List</Title>
+          <Title level="H4">Menu List</Title>
         </Bar>
       }
     >
@@ -201,11 +212,12 @@ const FormFields = () => {
               <FlexBox direction="Column">
                 <div>
                   <FlexBox direction="Column">
+                    {console.log("filteredRows", filteredRows)}
                     <AnalyticalTable
                       columns={columns}
                       data={filteredRows || []}
-                      header={"  FormFields list(" + filteredRows.length + ")"}
-                      visibleRows={5}
+                      header={"  MenuMaster list(" + filteredRows.length + ")"}
+                      visibleRows={8}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
                       onGroup={() => {}}
@@ -231,7 +243,7 @@ const FormFields = () => {
                         onClick={() => setLayout("OneColumn")}
                       />
                     }
-                    startContent={<Title level="H5">Preview FormFields</Title>}
+                    startContent={<Title level="H5">Preview MenuMaster</Title>}
                   ></Bar>
                 }
               >
@@ -245,7 +257,7 @@ const FormFields = () => {
                     verticalAlign: "middle",
                   }}
                 >
-                  <ViewFormFields id={ViewId} />
+                  <ViewMenuMaster id={ViewId} />
                 </div>
               </Page>
             }
@@ -257,5 +269,4 @@ const FormFields = () => {
 };
 
 
-
-export default FormFields
+export default MenuMaster

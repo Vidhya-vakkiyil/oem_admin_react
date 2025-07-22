@@ -40,7 +40,10 @@ const RolesList = () => {
       )
     ) {
       try {
-        await dispatch(deleteRole(role.id)).unwrap();
+        const res = await dispatch(deleteRole(role.id)).unwrap();
+        if (res.message === "Please Login!") {
+          navigate("/login");
+        }
       } catch (error) {
         console.error("Error deleting role:", error);
       }
@@ -56,9 +59,8 @@ const RolesList = () => {
     setViewId(role.id);
   };
 
-  const filteredRows = roles?.filter(
-    (role) =>
-      role.name.toLowerCase().includes(search.toLowerCase()) 
+  const filteredRows = roles?.filter((role) =>
+    role.name.toLowerCase().includes(search.toLowerCase())
   );
   const editRow = (row) => {
     console.log("Edit Row:", row);
@@ -68,25 +70,38 @@ const RolesList = () => {
       {
         Header: "Role Name",
         accessor: "name",
+        width: 220,
+
       },
       {
         Header: "Permissions",
         accessor: "Permissions",
+        width: 430,
+        height:400,
         Cell: ({ row }) =>
-          row.original.Permissions
-            ? <FlexBox direction="Column" style={{
-    height: "400px",               // or 100%, vh, etc.
-    overflowY: "auto",             // vertical scroll only
-    padding: "1rem",               // optional
-    gap: "1rem",                   // spacing between children
-    border: "1px solid #ccc"       // just for visual debugging
-  }}>{row.original.Permissions.map((perm) =>  <Token text={perm.name}/>) }</FlexBox>
-            : "No Permissions",
+          row.original.Permissions ? (
+            <FlexBox
+              style={{
+                overflowX: "auto", // vertical scroll only
+                padding: "1rem", // optional
+                border: "1px solid #ccc", // just for visual debugging
+              }}
+            >
+              {row.original.Permissions.map((perm) => (
+                <Token text={perm.name} />
+              ))}
+            </FlexBox>
+          ) : (
+            "No Permissions"
+          ),
       },
-     
+
       {
         Header: "Status",
         accessor: "status",
+        width: 220,
+
+
         Cell: ({ row }) =>
           row.original.status === 1 ? (
             <Tag children="Active" design="Positive" size="S" />
@@ -102,7 +117,8 @@ const RolesList = () => {
         disableResizing: true,
         disableSortBy: true,
         id: "actions",
-        width: 120,
+        width: 220,
+
 
         Cell: (instance) => {
           const { cell, row, webComponentsReactProperties } = instance;
@@ -212,6 +228,7 @@ const RolesList = () => {
                       data={filteredRows || []}
                       header={"  Roles list(" + filteredRows.length + ")"}
                       visibleRows={5}
+                      rowHeight={60}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
                       onGroup={() => {}}
@@ -263,4 +280,3 @@ const RolesList = () => {
 };
 
 export default RolesList;
-

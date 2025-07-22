@@ -28,15 +28,14 @@ import { useNavigate } from "react-router-dom";
 
 // Validation schema
 const schema = yup.object().shape({
-  form_name: yup.string().required("Form name is required"),
+  form_name: yup.string().required("Menu name is required"),
   display_name: yup.string().required("Display name is required"),
-
 });
 
-const FormFieldForm = ({
+const MenuForm = ({
   onSubmit,
   defaultValues = {
-    form_name: "",
+    menuform_name: "",
     display_name: "",
   },
   mode = "create",
@@ -95,7 +94,7 @@ const FormFieldForm = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {defaultValues.id ? "Update Form Field" : "Create Form Field"}
+                  {mode==="edit" ? "Update MenuForm" : "Create MenuForm"}
                 </Button>
               </>
             }
@@ -113,7 +112,7 @@ const FormFieldForm = ({
             />
           }
           startContent={
-            <div style={{ width: "270px" }}>
+            <div style={{ width: "200px" }}>
               <Breadcrumbs
                 design="Standard"
                 onItemClick={(e) => {
@@ -123,25 +122,25 @@ const FormFieldForm = ({
                 separators="Slash"
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/FormFields">
-                  FormFields
+                <BreadcrumbsItem data-route="/admin/MenuMaster">
+                  MenuForms
                 </BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/FormFields/create">
-                  Create Form Fields
+                <BreadcrumbsItem data-route="/admin/MenuMaster/create">
+                  Create MenuForm
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
           }
         >
           <Title level="h4">
-            {defaultValues.id ? "Edit Form Field" : "Create Form Field"}
+            {mode==="edit" ? "Edit MenuForm" : "Create New MenuForm"}
           </Title>
         </Bar>
       }
     >
       {apiError && (
         <MessageStrip
-          design="Negative" 
+          design="Negative"
           hideCloseButton={false}
           hideIcon={false}
           style={{ marginBottom: "1rem" }}
@@ -166,9 +165,9 @@ const FormFieldForm = ({
           style={{ gap: "1rem", paddingTop: "4rem" }}
         >
           <FlexBox direction="Column" style={{ flex: " 28%" }}>
-            <Label>Form </Label>
+            <Label>MenuForm Name</Label>
             <Controller
-              name="form_name"
+              name="menuform_name"
               control={control}
               render={({ field }) => (
                 <FormItem
@@ -176,7 +175,7 @@ const FormFieldForm = ({
                   style={{ flex: "48%" }}
                 >
                   <Input
-                    placeholder="Form"
+                    placeholder="MenuForm Name"
                     name="form_name"
                     value={field.value ?? ""} // controlled value
                     onInput={(e) => field.onChange(e.target.value)} // update RHF
@@ -194,7 +193,7 @@ const FormFieldForm = ({
             />
           </FlexBox>
           <FlexBox direction="Column" style={{ flex: " 28%" }}>
-            <Label>Form Section</Label>
+            <Label>Display Name</Label>
             <Controller
               name="display_name"
               control={control}
@@ -204,7 +203,7 @@ const FormFieldForm = ({
                   style={{ flex: "1 1 48%" }}
                 >
                   <Input
-                    placeholder="Form Section"
+                    placeholder="Display Name"
                     name="display_name"
                     value={field.value ?? ""}
                     onInput={(e) => field.onChange(e.target.value)}
@@ -221,114 +220,35 @@ const FormFieldForm = ({
             />
           </FlexBox>
           <FlexBox direction="Column" style={{ flex: " 28%" }}>
-            <Label>Field Name</Label>
-            <Controller
-              name="form_name"
-              control={control}
-              render={({ field }) => (
-                <FormItem
-                  label={<Label required>Label Text</Label>}
-                  style={{ flex: "48%" }}
-                >
-                  <Input
-                    placeholder="Field Name"
-                    name="form_name"
-                    value={field.value ?? ""} // controlled value
-                    onInput={(e) => field.onChange(e.target.value)} // update RHF
-                    valueState={errors.form_name ? "Error" : "None"} // red border on error
-                  >
-                    {errors.form_name && (
-                      /* UI5 shows this automatically when valueState="Error" */
-                      <span slot="valueStateMessage">
-                        {errors.form_name.message}
-                      </span>
-                    )}
-                  </Input>
-                </FormItem>
-              )}
-            />
-          </FlexBox>
-          <FlexBox direction="Column" style={{ flex: " 28%" }}>
-            <Label>Field Display Name</Label>
-            <Controller
-              name="display_name"
-              control={control}
-              render={({ field }) => (
-                <FormItem
-                  label={<Label required>Diaplay Name</Label>}
-                  style={{ flex: "1 1 48%" }}
-                >
-                  <Input
-                    placeholder="Field Display Name"
-                    name="display_name"
+            <Label>Status</Label>{" "}
+            <FormItem label={<Label required>Status</Label>}>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name="status"
                     value={field.value ?? ""}
-                    onInput={(e) => field.onChange(e.target.value)}
-                    valueState={errors.display_name ? "Error" : "None"}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    valueState={errors.status ? "Error" : "None"}
                   >
-                    {errors.display_name && (
-                      <span slot="valueStateMessage">
-                        {errors.display_name.message}
-                      </span>
-                    )}
-                  </Input>
-                </FormItem>
-              )}
-            />
-          </FlexBox>
-          <FlexBox direction="Column" style={{ flex: " 28%" }}>
-            <Label>Field type</Label>
-            <Controller
-              name="form_name"
-              control={control}
-              render={({ field }) => (
-                <FormItem
-                  label={<Label required>Label Text</Label>}
-                  style={{ flex: "48%" }}
+                    <Option>Select</Option>
+
+                    <Option value="1">Active</Option>
+                    <Option value="0">Inactive</Option>
+                  </Select>
+                )}
+              />
+
+              {errors.status && (
+                <span
+                  slot="valueStateMessage"
+                  style={{ color: "var(--sapNegativeColor)" }}
                 >
-                  <Input
-                    placeholder="Field Type"
-                    name="form_name"
-                    value={field.value ?? ""} // controlled value
-                    onInput={(e) => field.onChange(e.target.value)} // update RHF
-                    valueState={errors.form_name ? "Error" : "None"} // red border on error
-                  >
-                    {errors.form_name && (
-                      /* UI5 shows this automatically when valueState="Error" */
-                      <span slot="valueStateMessage">
-                        {errors.form_name.message}
-                      </span>
-                    )}
-                  </Input>
-                </FormItem>
+                  {errors.status.message}
+                </span>
               )}
-            />
-          </FlexBox>
-          <FlexBox direction="Column" style={{ flex: " 28%" }}>
-            <Label>Field Order</Label>
-            <Controller
-              name="display_name"
-              control={control}
-              render={({ field }) => (
-                <FormItem
-                  label={<Label required>Diaplay Name</Label>}
-                  style={{ flex: "1 1 48%" }}
-                >
-                  <Input
-                    placeholder="Field Order"
-                    name="display_name"
-                    value={field.value ?? ""}
-                    onInput={(e) => field.onChange(e.target.value)}
-                    valueState={errors.display_name ? "Error" : "None"}
-                  >
-                    {errors.display_name && (
-                      <span slot="valueStateMessage">
-                        {errors.display_name.message}
-                      </span>
-                    )}
-                  </Input>
-                </FormItem>
-              )}
-            />
+            </FormItem>
           </FlexBox>
         </FlexBox>
       </form>
@@ -337,4 +257,4 @@ const FormFieldForm = ({
 };
 
 
-export default FormFieldForm
+export default MenuForm

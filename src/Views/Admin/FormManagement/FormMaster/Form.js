@@ -28,15 +28,17 @@ import { useNavigate } from "react-router-dom";
 
 // Validation schema
 const schema = yup.object().shape({
-  form_name: yup.string().required("Form name is required"),
+  name: yup.string().required("Form name is required"),
   display_name: yup.string().required("Display name is required"),
+  status: yup.string().required("Status name is required"),
 });
 
 const Form = ({
   onSubmit,
   defaultValues = {
-    form_name: "",
+    name: "",
     display_name: "",
+    status:""
   },
   mode = "create",
   apiError,
@@ -73,7 +75,8 @@ const Form = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (mode === "edit" && defaultValues?.branchIds.length > 0) {
+    console.log("editdefaultValues",defaultValues)
+    if (mode === "edit") {
       setAssignBranchEnabled(true);
       setSelectedCompany(defaultValues.company || null);
       setSelectedBranchIds(defaultValues.branchIds || []);
@@ -94,7 +97,7 @@ const Form = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {defaultValues.id ? "Update Form" : "Create Form"}
+                  {mode==="edit" ? "Update Form" : "Create Form"}
                 </Button>
               </>
             }
@@ -133,14 +136,14 @@ const Form = ({
           }
         >
           <Title level="h4">
-            {defaultValues.id ? "Edit Form" : "Create New Form"}
+            {mode==="edit" ? "Edit Form" : "Create New Form"}
           </Title>
         </Bar>
       }
     >
       {apiError && (
         <MessageStrip
-          design="Negative" 
+          design="Negative"
           hideCloseButton={false}
           hideIcon={false}
           style={{ marginBottom: "1rem" }}
@@ -154,8 +157,7 @@ const Form = ({
         id="form"
         onSubmit={handleSubmit((formData) => {
           const fullData = {
-            ...formData,
-            branchIds: selectedBranchIds,
+            ...formData
           };
           onSubmit(fullData); // you already pass it upward
         })}
@@ -167,7 +169,7 @@ const Form = ({
           <FlexBox direction="Column" style={{ flex: " 28%" }}>
             <Label>Form Name</Label>
             <Controller
-              name="form_name"
+              name="name"
               control={control}
               render={({ field }) => (
                 <FormItem
@@ -176,15 +178,15 @@ const Form = ({
                 >
                   <Input
                     placeholder="Form Name"
-                    name="form_name"
+                    name="name"
                     value={field.value ?? ""} // controlled value
                     onInput={(e) => field.onChange(e.target.value)} // update RHF
-                    valueState={errors.form_name ? "Error" : "None"} // red border on error
+                    valueState={errors.name ? "Error" : "None"} // red border on error
                   >
-                    {errors.form_name && (
+                    {errors.name && (
                       /* UI5 shows this automatically when valueState="Error" */
                       <span slot="valueStateMessage">
-                        {errors.form_name.message}
+                        {errors.name.message}
                       </span>
                     )}
                   </Input>
@@ -218,6 +220,37 @@ const Form = ({
                 </FormItem>
               )}
             />
+          </FlexBox>
+          <FlexBox direction="Column" style={{ flex: " 28%" }}>
+            <Label>Status</Label>{" "}
+            <FormItem label={<Label required>Status</Label>}>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name="status"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    valueState={errors.status ? "Error" : "None"}
+                  >
+                    <Option>Select</Option>
+
+                    <Option value="1">Active</Option>
+                    <Option value="0">Inactive</Option>
+                  </Select>
+                )}
+              />
+
+              {errors.status && (
+                <span
+                  slot="valueStateMessage"
+                  style={{ color: "var(--sapNegativeColor)" }}
+                >
+                  {errors.status.message}
+                </span>
+              )}
+            </FormItem>
           </FlexBox>
         </FlexBox>
       </form>

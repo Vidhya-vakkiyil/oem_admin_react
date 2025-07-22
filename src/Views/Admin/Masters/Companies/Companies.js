@@ -38,7 +38,10 @@ const Companies = () => {
   const handleDelete = async (company) => {
     if (window.confirm(`Are you sure to delete user: ${company.name}?`)) {
       try {
-        await dispatch(deleteCompany(company.id)).unwrap();
+        const res = await dispatch(deleteCompany(company.id)).unwrap();
+        if (res.message === "Please Login!") {
+          navigate("/login");
+        }
       } catch (error) {
         console.error("Error deleting company:", error);
       }
@@ -205,7 +208,7 @@ const Companies = () => {
                       columns={columns}
                       data={filteredRows || []}
                       header={"  Companies list(" + filteredRows.length + ")"}
-                      visibleRows={5}
+                      visibleRows={8}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
                       onGroup={() => {}}

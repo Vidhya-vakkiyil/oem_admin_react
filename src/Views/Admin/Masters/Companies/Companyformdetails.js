@@ -31,16 +31,20 @@ const schema = yup.object().shape({
   name: yup.string().required("form_name is required"),
   city: yup.string().required("display_name is required"),
   address: yup.string().required("display_name is required"),
-
 });
 
 const Companyformdetails = ({
   onSubmit,
   defaultValues = {
-   name:"",
-   city:"",
-   address:""
+    name: "",
+    company_code: "",
+    company_db_name: "",
+    city: "",
+    address: "",
+    is_branch: "",
+    status: "",
   },
+  mode = "create",
   apiError,
 }) => {
   const {
@@ -49,7 +53,7 @@ const Companyformdetails = ({
     formState: { errors },
   } = useForm({
     defaultValues,
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema, { context: { mode } }),
   });
   const formRef = useRef(null);
 
@@ -78,7 +82,7 @@ const Companyformdetails = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {defaultValues.id ? "Update Form" : "Create Form"}
+                  {mode === "edit" ? "Update Company" : "Create Company"}
                 </Button>
               </>
             }
@@ -96,7 +100,7 @@ const Companyformdetails = ({
             />
           }
           startContent={
-            <div style={{ width: "200px" }}>
+            <div style={{ width: "250px" }}>
               <Breadcrumbs
                 design="Standard"
                 onItemClick={(e) => {
@@ -106,25 +110,25 @@ const Companyformdetails = ({
                 separators="Slash"
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/FormMaster">
-                  Forms
+                <BreadcrumbsItem data-route="/admin/companies">
+                  Companies
                 </BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/FormMaster/create">
-                  Create Form
+                <BreadcrumbsItem data-route="/admin/companies/create">
+                  Create Company
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
           }
         >
           <Title level="h4">
-            {defaultValues.id ? "Edit Form" : "Create New Form"}
+            {mode === "edit" ? "Edit Company" : "Create Company"}
           </Title>
         </Bar>
       }
     >
       {apiError && (
         <MessageStrip
-          design="Negative" 
+          design="Negative"
           hideCloseButton={false}
           hideIcon={false}
           style={{ marginBottom: "1rem" }}
@@ -176,6 +180,62 @@ const Companyformdetails = ({
             />
           </FlexBox>
           <FlexBox direction="Column" style={{ flex: " 28%" }}>
+            <Label>Company Db Name</Label>
+            <Controller
+              name="company_db_name"
+              control={control}
+              render={({ field }) => (
+                <FormItem
+                  label={<Label required>Label Text</Label>}
+                  style={{ flex: "48%" }}
+                >
+                  <Input
+                    placeholder="Company Db Name"
+                    name="company_db_name"
+                    value={field.value ?? ""} // controlled value
+                    onInput={(e) => field.onChange(e.target.value)} // update RHF
+                    valueState={errors.company_db_name ? "Error" : "None"} // red border on error
+                  >
+                    {errors.company_db_name && (
+                      /* UI5 shows this automatically when valueState="Error" */
+                      <span slot="valueStateMessage">
+                        {errors.company_db_name.message}
+                      </span>
+                    )}
+                  </Input>
+                </FormItem>
+              )}
+            />
+          </FlexBox>
+          <FlexBox direction="Column" style={{ flex: " 28%" }}>
+            <Label>Company Code</Label>
+            <Controller
+              name="company_code"
+              control={control}
+              render={({ field }) => (
+                <FormItem
+                  label={<Label required>Label Text</Label>}
+                  style={{ flex: "48%" }}
+                >
+                  <Input
+                    placeholder="Company Code"
+                    name="company_code"
+                    value={field.value ?? ""} // controlled value
+                    onInput={(e) => field.onChange(e.target.value)} // update RHF
+                    valueState={errors.company_code ? "Error" : "None"} // red border on error
+                  >
+                    {errors.company_code && (
+                      /* UI5 shows this automatically when valueState="Error" */
+                      <span slot="valueStateMessage">
+                        {errors.company_code.message}
+                      </span>
+                    )}
+                  </Input>
+                </FormItem>
+              )}
+            />
+          </FlexBox>
+          <FlexBox direction="Column" style={{ flex: " 48%" }}>
             <Label>city</Label>
             <Controller
               name="city"
@@ -202,8 +262,8 @@ const Companyformdetails = ({
               )}
             />
           </FlexBox>
-          
-          <FlexBox direction="Column" style={{ flex: " 28%" }}>
+
+          <FlexBox direction="Column" style={{ flex: " 48%" }}>
             <Label>Address</Label>
             <Controller
               name="address"
@@ -229,6 +289,68 @@ const Companyformdetails = ({
                 </FormItem>
               )}
             />
+          </FlexBox>
+
+          <FlexBox direction="Column" style={{ flex: " 48%" }}>
+            <Label>Status</Label>{" "}
+            <FormItem label={<Label required>Status</Label>}>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name="status"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    valueState={errors.status ? "Error" : "None"}
+                  >
+                    <Option>Select</Option>
+
+                    <Option value="1">Active</Option>
+                    <Option value="0">Inactive</Option>
+                  </Select>
+                )}
+              />
+
+              {errors.status && (
+                <span
+                  slot="valueStateMessage"
+                  style={{ color: "var(--sapNegativeColor)" }}
+                >
+                  {errors.status.message}
+                </span>
+              )}
+            </FormItem>
+          </FlexBox>
+          <FlexBox direction="Column" style={{ flex: " 48%" }}>
+            <Label>Is branch</Label>
+            <FormItem label={<Label required>Is Branch</Label>}>
+              <Controller
+                name="is_branch"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name="is_branch"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    valueState={errors.is_branch ? "Error" : "None"}
+                  >
+                    <Option>Select</Option>
+                    <Option value="1">Yes</Option>
+                    <Option value="0">No</Option>
+                  </Select>
+                )}
+              />
+
+              {errors.is_branch && (
+                <span
+                  slot="valueStateMessage"
+                  style={{ color: "var(--sapNegativeColor)" }}
+                >
+                  {errors.is_branch.message}
+                </span>
+              )}
+            </FormItem>
           </FlexBox>
         </FlexBox>
       </form>

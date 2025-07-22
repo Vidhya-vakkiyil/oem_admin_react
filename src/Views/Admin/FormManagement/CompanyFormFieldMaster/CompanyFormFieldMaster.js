@@ -18,59 +18,120 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Admin from "../../Admin";
-import {
-  fetchCompanyForms,
-  deleteCompanyForms,
-} from "../../../../store/slices/CompanyFormSlice";
-const ViewCompanyMaster = Loadable(lazy(() => import("./ViewCompanyMaster")));
 
-const CompanyMaster = () => {
+import {
+  deleteCompanyFormsFields,
+  fetchCompanyFormfields,
+} from "../../../../store/slices/companyformfieldSlice";
+import EditFormfield from "./EditFormfield";
+const ViewCompanyFormFieldMaster = Loadable(
+  lazy(() => import("./ViewCompanyFormFieldMaster"))
+);
+
+const CompanyFormFieldMaster = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { companyforms, loading } = useSelector((state) => state.companyforms);
+  const { companyformfield, loading } = useSelector(
+    (state) => state.companyformfield
+  );
   const [search, setSearch] = useState("");
   const [layout, setLayout] = useState("OneColumn");
   const [ViewId, setViewId] = useState("");
+  const [formfieldpageOpen, setformFieldpageopen] = useState(false);
+  const [editfield, setEditfield] = useState([]);
+  const [formFieldList, setFormFieldList] = useState([]);
+  const [editformfielddetails, seteditformfielddetails] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchCompanyForms());
+    dispatch(fetchCompanyFormfields());
   }, [dispatch]);
-  const handleDelete = async (companyform) => {
+  const handleDelete = async (companyformfield) => {
     if (
       window.confirm(
-        `Are you sure to delete user: ${companyform.companyId}?`
+        `Are you sure to delete user: ${companyformfield.companyId}?`
       )
     ) {
       try {
-        await dispatch(deleteCompanyForms(companyform.id)).unwrap();
+        const res = await dispatch(
+          deleteCompanyFormsFields(companyformfield.id)
+        ).unwrap();
+        if (res.message === "Please Login!") {
+          navigate("/login");
+        }
       } catch (error) {
         console.error("Error deleting user:", error);
       }
     }
   };
-
-  const handleEdit = (user) => {
-    navigate(`/admin/company-forms/edit/${user.id}`);
+  const handleEditCompanyFormfield = (data) => {
+    console.log("handleEditCompanyFormfield", editfield, data, formFieldList);
+    const updateddata = {
+      Form: editfield.Form,
+      FormSection: editfield.FormSection,
+      bind_data_by: data.bind_data_by,
+      display_name: data.display_name,
+      field_name: data.field_name,
+      field_order: data.field_order,
+      input_type: data.input_type,
+      is_field_data_bind: data.is_field_data_bind,
+      is_visible: data.is_visible,
+      status: data.status,
+    };
+    const updatedList = formFieldList.map((field) =>
+      field.id === editfield.id ? { ...field, ...updateddata } : field
+    );
+    console.log("updatedList", updatedList);
+    setformFieldpageopen(false);
+    setFormFieldList(updatedList);
+  };
+  const handleEdit = (data) => {
+    console.log("handleEditCompanyFormfield", editfield, data, formFieldList);
+    const updateddata = {
+      Form: editfield.Form,
+      FormSection: editfield.FormSection,
+      bind_data_by: data.bind_data_by,
+      display_name: data.display_name,
+      field_name: data.field_name,
+      field_order: data.field_order,
+      input_type: data.input_type,
+      is_field_data_bind: data.is_field_data_bind,
+      is_visible: data.is_visible,
+      status: data.status,
+    };
+    const updatedList = formFieldList.map((field) =>
+      field.id === editfield.id ? { ...field, ...updateddata } : field
+    );
+    console.log("updatedList", updatedList);
+    setformFieldpageopen(true);
+    setFormFieldList(updatedList);
   };
 
   const handleView = (user) => {
     //navigate(`/company-forms/${user.id}`);
     setViewId(user.id);
   };
+  const handleFilterpage = (item) => {
+    console.log("handleFilterpage", item.id);
+    navigate(`/admin/CompanyFormFields/filter/${item.id}`);
+  };
   {
-    console.log("companyforms", companyforms);
+    console.log("companyformfield", companyformfield);
   }
-  const filteredRows = companyforms?.filter(
-    (companyform) =>
-      companyform.Company?.name.toLowerCase().includes(search.toLowerCase()) ||
-      companyform.Form?.name.toLowerCase().includes(search.toLowerCase()) ||
-      companyform.form_type.toLowerCase().includes(search.toLowerCase())
+  const filteredRows = companyformfield?.filter(
+    (companyformfield) =>
+      companyformfield.Company?.name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      companyformfield.Form?.name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      companyformfield.form_type.toLowerCase().includes(search.toLowerCase())
   );
 
   const columns = useMemo(
     () => [
       {
-        Header: "Company Name",
+        Header: "Company",
         accessor: "company_name",
         Cell: ({ row }) => row.original.Company?.name || "N/A",
       },
@@ -80,8 +141,17 @@ const CompanyMaster = () => {
         Cell: ({ row }) => row.original.Form?.display_name || "N/A",
       },
       {
-        Header: "Form Type",
-        accessor: "form_type",
+        Header: "Form Section",
+        accessor: "form_section",
+        Cell: ({ row }) => row.original.FormSection?.section_name || "N/A",
+      },
+      {
+        Header: "Field Name",
+        accessor: "field_name",
+      },
+      {
+        Header: "Input type",
+        accessor: "input_type",
       },
       {
         Header: "Status",
@@ -101,7 +171,7 @@ const CompanyMaster = () => {
         disableResizing: true,
         disableSortBy: true,
         id: "actions",
-        width: 120,
+        width: 220,
 
         Cell: (instance) => {
           const { cell, row, webComponentsReactProperties } = instance;
@@ -121,6 +191,14 @@ const CompanyMaster = () => {
                 design="Transparent"
                 //onClick={() => { setLayout("TwoColumnsMidExpanded");setViewItem(row.original)}}
                 onClick={() => handleDelete(row.original)}
+              />
+              <Button
+                icon="sap-icon://filter"
+                disabled={isOverlay}
+                design="Transparent"
+                onClick={() => {
+                  handleFilterpage(row.original);
+                }}
               />
               <Button
                 icon="sap-icon://navigation-right-arrow"
@@ -156,8 +234,8 @@ const CompanyMaster = () => {
                 }}
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/company-forms">
-                  CompanyForms
+                <BreadcrumbsItem data-route="/admin/CompanyFormFields">
+                  companyformfield
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
@@ -165,13 +243,13 @@ const CompanyMaster = () => {
           endContent={
             <Button
               design="Emphasized"
-              onClick={() => navigate("/admin/company-forms/create")}
+              onClick={() => navigate("/admin/CompanyFormFields/create")}
             >
-              Add 
+              Add
             </Button>
           }
         >
-          <Title level="H4">Company Form List</Title>
+          <Title level="H4">Company Form Field List</Title>
         </Bar>
       }
     >
@@ -209,7 +287,11 @@ const CompanyMaster = () => {
                     <AnalyticalTable
                       columns={columns}
                       data={filteredRows || []}
-                      header={"  Company Forms List(" + filteredRows.length + ")"}
+                      header={
+                        "  Company Forms Field List(" +
+                        filteredRows.length +
+                        ")"
+                      }
                       visibleRows={5}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
@@ -236,7 +318,9 @@ const CompanyMaster = () => {
                         onClick={() => setLayout("OneColumn")}
                       />
                     }
-                    startContent={<Title level="H5">Preview Company Form</Title>}
+                    startContent={
+                      <Title level="H5">Preview Company Form Field</Title>
+                    }
                   ></Bar>
                 }
               >
@@ -250,15 +334,22 @@ const CompanyMaster = () => {
                     verticalAlign: "middle",
                   }}
                 >
-                  <ViewCompanyMaster id={ViewId} />
+                  {ViewId && <ViewCompanyFormFieldMaster id={ViewId} />}
                 </div>
               </Page>
             }
           />
         </FlexBox>
       </Card>
+      <EditFormfield
+        formfieldpageOpen={formfieldpageOpen}
+        setformFieldpageopen={setformFieldpageopen}
+        onSubmit={handleEditCompanyFormfield}
+        mode="edit"
+        defaultValues={editformfielddetails}
+      />
     </Page>
   );
 };
 
-export default CompanyMaster;
+export default CompanyFormFieldMaster;

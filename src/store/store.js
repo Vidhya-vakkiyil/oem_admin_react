@@ -6,8 +6,10 @@ import permissionReducer from './slices/permissionSlice';
 import companyReducer from './slices/companiesSlice';
 import branchReducer from './slices/branchesSlice';
 import formReducer from './slices/formmasterSlice';
-import companyformReducer from './slices/CompanyFormSlice'
-
+import companyformReducer from './slices/CompanyFormSlice';
+import formfieldReducer from './slices/FormFieldSlice';
+import formsectionReducer from './slices/formsectionSlice'
+import companyformfieldReducer from './slices/companyformfieldSlice'
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -18,6 +20,9 @@ const store = configureStore({
     branches: branchReducer,
     forms:formReducer,
     companyforms:companyformReducer,
+    formField:formfieldReducer,
+    formsection:formsectionReducer,
+    companyformfield:companyformfieldReducer,
   },
 });
 

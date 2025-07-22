@@ -115,7 +115,7 @@ const UserForm = ({
                   form="userForm" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {defaultValues.id ? "Update User" : "Create User"}
+                  {mode==="edit" ? "Update User" : "Create User"}
                 </Button>
               </>
             }
@@ -154,7 +154,7 @@ const UserForm = ({
           }
         >
           <Title level="h4">
-            {defaultValues.id ? "Edit User" : "Create New User"}
+            {mode==="edit" ? "Edit User" : "Create New User"}
           </Title>
         </Bar>
       }

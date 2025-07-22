@@ -39,7 +39,10 @@ const Users = () => {
       )
     ) {
       try {
-        await dispatch(deleteUser(user.id)).unwrap();
+        const res = await dispatch(deleteUser(user.id)).unwrap();
+        if (res.message === "Please Login!") {
+          navigate("/login");
+        }
       } catch (error) {
         console.error("Error deleting user:", error);
       }
@@ -210,7 +213,7 @@ const Users = () => {
                       columns={columns}
                       data={filteredRows || []}
                       header={"  Users list(" + filteredRows.length + ")"}
-                      visibleRows={5}
+                      visibleRows={8}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
                       onGroup={() => {}}

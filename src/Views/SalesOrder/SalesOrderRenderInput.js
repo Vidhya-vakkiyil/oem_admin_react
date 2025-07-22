@@ -3,6 +3,7 @@ import {
   CheckBox,
   DatePicker,
   Dialog,
+  FlexBox,
   Icon,
   Input,
   Label,
@@ -26,8 +27,8 @@ export const SalesOrderRenderInput = (
   setInputValue
 ) => {
   console.log("changeinputselect", form, field);
-  const value = form[field.FieldName] || "";
-
+ // const value = form[field.field_name] || "";
+const [value,setvalue] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false);
   const [customerdialogOpen, setCustomerDialogOpen] = useState(false);
 
@@ -46,8 +47,8 @@ export const SalesOrderRenderInput = (
   };
 
   // Handle value help button click
-  const handleValueHelpRequest = (fieldname) => {
-    if (fieldname === "Customer") {
+  const handleValueHelpRequest = (field_name) => {
+    if (field_name === "Customer") {
       setCustomerDialogOpen(true);
     } else {
       setDialogOpen(true);
@@ -55,8 +56,8 @@ export const SalesOrderRenderInput = (
   };
 
   // Handle popup item click
-  const handleDialogItemClick = (selectedItem) => {
-    //const selectedItem = e.detail.item.textContent;
+  const handleDialogItemClick = (e) => {
+    const selectedItem = e.detail.item.textContent;
     console.log("selectedItem", selectedItem);
     setInputValue(selectedItem);
     setDialogOpen(false);
@@ -67,37 +68,45 @@ export const SalesOrderRenderInput = (
     const selectedOption = e.detail.selectedOption;
     setSelectedKey(selectedOption.innerText); // or use selectedOption.getAttribute("data-key")
   };
-  switch (field.inputType) {
+  switch (field.input_type) {
     case "text":
     case "number":
       return (
         <>
-          {console.log("inputvaluetext", inputvalue && inputvalue)}
           <Input
             value={
-              (inputvalue && inputvalue.map((val) => val[field.FieldName])) ||
-              ""
+              //(inputvalue &&inputvalue.length>0&& inputvalue.map((val) => val[field.field_name])) ||
+             value
             }
-            name={field.FieldName}
-            onInput={(e) => handleChange(e, field.FieldName)}
-            type={field.inputType}
+            name={field.field_name}
+            onInput={(e) => handleChange(e, field.field_name)}
+            type={field.input_type}
           ></Input>
         </>
       );
-    case "select":
+    case "search":
+      return (
+        <Input
+          placeholder="Search..."
+          type="Search"
+          onInput={(e) => console.log("Search input:", e.target.value)}
+          onChange={(e) => console.log("Search committed:", e.target.value)}
+        />
+      );
+    case "Select":
       return (
         <>
           <Input
             icon={
               <Icon
                 name="value-help"
-                onClick={() => handleValueHelpRequest(field.FieldName)}
+                onClick={() => handleValueHelpRequest(field.field_name)}
               />
             }
-            name={field.FieldName}
-            value={(inputvalue && inputvalue.map((val) => val.BPCode)) || value}
-            onInput={(e) => handleChange(e, field.FieldName)}
-            type={field.inputType}
+            name={field.field_name}
+            value={inputvalue}
+            onInput={(e) => handleChange(e, field.field_name)}
+            type={field.input_type}
             style={{
               width: "470px",
             }}
@@ -114,30 +123,32 @@ export const SalesOrderRenderInput = (
             onAfterClose={() => setDialogOpen(false)}
             footer={<Button onClick={() => setDialogOpen(false)}>Close</Button>}
           >
-            <List onItemClick={handleDialogItemClick}>
+            <List onItemClick={(e)=>handleDialogItemClick(e)}>
               {productCollection.map((item, idx) => (
-                <ListItemStandard key={idx}>{item.Name}</ListItemStandard>
+                <ListItemStandard key={idx} value={item.Name}>
+                  {item.Name}
+                </ListItemStandard>
               ))}
             </List>
           </Dialog>
-          <RenderCustomerDialog
+          {/* <RenderCustomerDialog
             customerdialogOpen={customerdialogOpen}
             setCustomerDialogOpen={setCustomerDialogOpen}
             setInputValue={setInputValue}
-          />
+          /> */}
         </>
       );
     case "date":
       return (
         <DatePicker
           value={value}
-          onChange={(e) => handleChange(e, field.FieldName)}
+          onChange={(e) => handleChange(e, field.field_name)}
         />
       );
     case "checkbox":
       return (
         <CheckBox
-          onChange={(e) => handleChange(e, field.FieldName)}
+          onChange={(e) => handleChange(e, field.field_name)}
           text="CheckBox"
           valueState="None"
         />
@@ -172,7 +183,7 @@ export const SalesOrderRenderInput = (
       return (
         <TextArea
           value={value}
-          onInput={(e) => handleChange(e, field.FieldName)}
+          onInput={(e) => handleChange(e, field.field_name)}
         />
       );
     default:

@@ -53,13 +53,20 @@ export default function AuthLogin() {
     event.preventDefault();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(login(credentials));
+
+    try {
+      const res = await dispatch(login(credentials));
+      console.log(res);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <>
+      {console.log("error", error)}
       {error && (
         <MessageStrip
           design="Negative" // For "error" severity
@@ -74,7 +81,7 @@ export default function AuthLogin() {
         direction="Column"
         justifyContent="Center"
         alignItems="Center"
-        style={{ height: "100vh", backgroundColor: "#f3f6f9" }}
+        style={{ height: "90vh", backgroundColor: "#f3f6f9" }}
       >
         <Card
           style={{
@@ -89,21 +96,41 @@ export default function AuthLogin() {
             alignItems="Center"
             style={{ marginBottom: "1.5rem" }}
           >
-            <Title
-              level="H3"
-              style={{ marginBottom: "0.25rem", fontWeight: "bold" }}
+            {/* <Title
+              level="H1"
+              style={{
+                fontSize: "1.2rem",
+                fontWeight: "200",
+                color: "black",
+                letterSpacing: "0.5px",
+                fontFamily: "72, Arial, sans-serif",
+                borderBottom: "3px solid rgb(13, 13, 14)", // Underline
+                display: "inline-block", // Keeps underline to text width
+                margin: "0.6rem",
+              }}
             >
               OEM
-            </Title>
+            </Title> */}
+             <img 
+             width={"50px"}
+                alt="person-placeholder"
+                src="https://cdn.vectorstock.com/i/2000v/40/54/oem-original-equipment-manufacturing-vector-45464054.avif"
+              />
             <Title
               level="H5"
-              style={{ color: "#7e57c2", marginBottom: "0.25rem" }}
+              style={{ fontSize: "1rem",color: "#7e57c2", marginBottom: "0.25rem",marginTop:"1rem" }}
             >
               Hi, Welcome Back
             </Title>
-            <Label style={{ fontSize: "0.875rem", color: "#666" }}>
+            <span
+              style={{
+                fontSize: "1rem",
+                color: "#6a6d70",
+                fontFamily: "72, Arial, sans-serif",
+              }}
+            >
               Enter your credentials to continue
-            </Label>
+            </span>
           </FlexBox>
 
           {error && (
@@ -111,43 +138,61 @@ export default function AuthLogin() {
               {error}
             </MessageStrip>
           )}
-        
-         
-          <FormItem   label="Email Address / Username">
-            <Input
-              type="Email"
-              value={credentials.email}
-              name="email"
-              placeholder="Enter email"
-              onInput={(e) =>
-                handleChange({
-                  target: { name: "email", value: e.target.value },
-                })
-              }
-            />
-          </FormItem>
 
-          <FormItem label="Password">
-            <Input
-              type={showPassword ? "Text" : "Password"}
-              value={credentials.password}
-              name="password"
-              placeholder="Enter password"
-              onInput={(e) =>
-                handleChange({
-                  target: { name: "password", value: e.target.value },
-                })
-              }
-              icon={<Icon name={showPassword ? "hide" : "show"} />}
-              onIconClick={() => setShowPassword(!showPassword)}
-              showIcon
-            />
-          </FormItem>
+          <FlexBox direction="Column" style={{ width: "100%", gap: "0.5rem" }}>
+            {/* Email Row */}
+            <FlexBox
+              direction="Column"
+              alignItems="Center"
+              style={{ gap: "0.5rem" }}
+            >
+              <Input
+                style={{ width: "80%" }}
+                type="Email"
+                value={credentials.email}
+                name="email"
+                placeholder="Enter email"
+                onInput={(e) =>
+                  handleChange({
+                    target: { name: "email", value: e.target.value },
+                  })
+                }
+              />
+            </FlexBox>
+
+            {/* Password Row */}
+            <FlexBox
+              direction="Column"
+              alignItems="Center"
+              style={{ gap: "1rem" }}
+            >
+              <Input
+                style={{ width: "80%" }}
+                type={showPassword ? "Text" : "Password"}
+                value={credentials.password}
+                name="password"
+                placeholder="Enter password"
+                onInput={(e) =>
+                  handleChange({
+                    target: { name: "password", value: e.target.value },
+                  })
+                }
+                icon={<Icon name={showPassword ? "hide" : "show"} />}
+                onIconClick={() => setShowPassword(!showPassword)}
+                showIcon
+              />
+            </FlexBox>
+          </FlexBox>
 
           <FlexBox
             justifyContent="SpaceBetween"
             alignItems="Center"
-            style={{ margin: "1rem 0" }}
+            style={{
+              marginLeft: "2rem",
+              marginBottom: "1rem",
+              marginTop: "1rem",
+            }}
+            direction="Row"
           >
             <CheckBox
               text="Keep me logged in"
@@ -157,24 +202,30 @@ export default function AuthLogin() {
             <Link
               href="/forgot-password"
               design="Emphasized"
-              style={{ textDecoration: "none" }}
+              style={{ textDecoration: "none", marginRight: "2rem" }}
             >
               Forgot Password?
             </Link>{" "}
           </FlexBox>
 
-          <Button
-            design="Emphasized"
-            disabled={status === "loading"}
-            onClick={handleSubmit} // Replace with your form submit handler
-            style={{ width: "100%" }}
-          >
-            {status === "loading" ? (
-              <BusyIndicator size="Small" active />
-            ) : (
-              "Sign In"
-            )}
-          </Button>
+          <FlexBox alignItems="Center">
+            <Button
+              design="Emphasized"
+              disabled={status === "loading"}
+              onClick={handleSubmit} // Replace with your form submit handler
+              style={{
+                width: "80%",
+                marginLeft: "2.5rem",
+                marginBottom: "2rem",
+              }}
+            >
+              {status === "loading" ? (
+                <BusyIndicator size="Small" active />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </FlexBox>
         </Card>
       </FlexBox>
     </>

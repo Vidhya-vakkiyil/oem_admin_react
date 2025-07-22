@@ -1,7 +1,7 @@
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { createUser } from '../../../../store/slices/usersSlice';
-import UserForm from './UserForm';
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { createUser } from "../../../../store/slices/usersSlice";
+import UserForm from "./UserForm";
 
 const CreateUser = () => {
   const dispatch = useDispatch();
@@ -17,11 +17,15 @@ const CreateUser = () => {
         password: data.password,
         roleId: data.roleId,
         branchIds: data.branchIds,
-        status: data.status
+        status: data.status,
+      };
+
+      const res = await dispatch(createUser(payload)).unwrap();
+      if (res.message === "Please Login!") {
+        navigate("/login");
+      } else {
+        navigate("/admin/users");
       }
-      
-      await dispatch(createUser(payload)).unwrap();
-      navigate('/users');
     } catch (error) {
       console.error(error);
     }

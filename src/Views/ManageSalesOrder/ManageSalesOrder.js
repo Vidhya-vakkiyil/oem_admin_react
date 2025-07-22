@@ -24,23 +24,36 @@ import {
   ToolbarButton,
 } from "@ui5/webcomponents-react";
 import Moment from "moment";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { FormConfigContext } from "../../Components/Context/FormConfigContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { HeaderFilterBar } from "./HeaderFilterBar";
 import ItemViewPage from "../SalesOrder/Contents/Item/ItemViewPage";
 import ViewSalesOrder from "./ViewSalesOrder";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchFormFields } from "../../store/slices/FormFieldSlice";
+import { fetchCompanyFormfields } from "../../store/slices/companyformfieldSlice";
 
 const ManageSalesOrder = () => {
   const {
     fieldConfig,
     ManageSalesOrderTableColumn,
     ManageSalesOrderTableData,
-    ManageSalesOderHeaderField,
+    //ManageSalesOderHeaderField,
   } = useContext(FormConfigContext);
+  const dispatch = useDispatch();
+
+  const { companyformfield } = useSelector((state) => state.companyformfield);
+  const ManageSalesOderHeaderField = companyformfield.filter(
+    (c) => c.Form?.name === "M_SO"
+  );
+
+  useEffect(() => {
+    dispatch(fetchCompanyFormfields());
+  }, [dispatch]);
   const [tableData, settableData] = useState(ManageSalesOrderTableData);
-    const [viewItem, setViewItem] = useState([]);
-  
+  const [viewItem, setViewItem] = useState([]);
+
   const [companyCode, setCompanyCode] = useState("");
   const [disable, setDisable] = useState(true);
   const [customField, setCustomField] = useState("1");
@@ -85,12 +98,14 @@ const ManageSalesOrder = () => {
           const isOverlay = webComponentsReactProperties.showOverlay;
           return (
             <FlexBox alignItems="Center">
-              
               <Button
                 icon="sap-icon://navigation-right-arrow"
                 disabled={isOverlay}
                 design="Transparent"
-                onClick={() => { setLayout("TwoColumnsMidExpanded");setViewItem(row.original)}}
+                onClick={() => {
+                  setLayout("TwoColumnsMidExpanded");
+                  setViewItem(row.original);
+                }}
                 // onClick={() => editRow(row)}
               />
             </FlexBox>
@@ -100,6 +115,9 @@ const ManageSalesOrder = () => {
     ],
     [ManageSalesOrderTableCols]
   );
+  const handleChange = (e) => {
+    console.log("e", e);
+  };
   return (
     <div>
       <DynamicPage
@@ -122,9 +140,23 @@ const ManageSalesOrder = () => {
               hSpacing="1rem"
               vSpacing="1rem"
             >
-              {ManageSalesOderHeaderField.map((field) =>
-                HeaderFilterBar(field, tableData, settableData)
-              )}
+              {ManageSalesOderHeaderField.map((field) => {
+                const filteredData = {
+                  inputType: field.input_type,
+                  DisplayName: field.display_name,
+                  FieldName: field.field_name,
+                };
+
+                return (
+                  <HeaderFilterBar
+                    key={field.field_name}
+                    field={filteredData}
+                    tableData={tableData}
+                    settableData={settableData}
+                    handleChange={handleChange}
+                  />
+                );
+              })}
             </Grid>
           </DynamicPageHeader>
         }
@@ -137,7 +169,11 @@ const ManageSalesOrder = () => {
           <DynamicPageTitle
             actionsBar={
               <Toolbar design="Transparent">
-                <ToolbarButton design="Emphasized" onClick={() => navigate("/SalesOrder")} text="Create" />
+                <ToolbarButton
+                  design="Emphasized"
+                  onClick={() => navigate("/SalesOrder")}
+                  text="Create"
+                />
               </Toolbar>
             }
             breadcrumbs={
@@ -177,63 +213,55 @@ const ManageSalesOrder = () => {
               layout={layout}
               startColumn={
                 <FlexBox direction="Column">
-                  
                   <div>
-                  
-                        <FlexBox direction="Column">
-                          <AnalyticalTable
-                            columns={columns.length > 0 ? columns : []}
-                            data={tableData}
-                            header={
-                              "Sales Order list(" +
-                              ManageSalesOrderTableData.length +
-                              ")"
-                            }
-                            //loading={isLoading}
-                            //showOverlay={isLoading}
-                            noDataText={
-                              "You have not created any sales order yet"
-                            }
-                            sortable
-                            filterable
-                            visibleRows={10}
-                            // visibleRowCountMode="Fixed"
-                            minRows={5}
-                            scaleWidthMode="Smart"
-                            groupBy={[]}
-                            groupable
-                            // header="Table Title"
-                            infiniteScroll
-                            onGroup={() => {}}
-                            onLoadMore={() => {}}
-                            onRowClick={(event) => {
-                              console.log(
-                                "Row::",
-                                event.detail.row.original._id
-                              );
-                              //previewFormInModal(event.detail.row.original._id);
-                            }}
-                            onRowExpandChange={() => {}}
-                            onSort={() => {}}
-                            onTableScroll={() => {}}
-                            // selectedRowIds={{
-                            //     3: true,
-                            // }}
-                            selectionMode="SingleSelect"
-                            selectionBehavior="RowOnly"
-                            // tableHooks={[AnalyticalTableHooks.useManualRowSelect("isSelected")]}
-                            // markNavigatedRow={markNavigatedRow}
-                            onRowSelect={onRowSelect}
-                            // withRowHighlight
-                            // adjustTableHeightOnPopIn
-                            rowHeight={40}
-                            headerRowHeight={44}
-                            // retainColumnWidth
-                            // alternateRowColor
-                            withNavigationHighlight
-                          />
-                        </FlexBox>
-                     
+                    <FlexBox direction="Column">
+                      <AnalyticalTable
+                        columns={columns.length > 0 ? columns : []}
+                        data={tableData}
+                        header={
+                          "Sales Order list(" +
+                          ManageSalesOrderTableData.length +
+                          ")"
+                        }
+                        //loading={isLoading}
+                        //showOverlay={isLoading}
+                        noDataText={"You have not created any sales order yet"}
+                        sortable
+                        filterable
+                        visibleRows={8}
+                        // visibleRowCountMode="Fixed"
+                        minRows={5}
+                        scaleWidthMode="Smart"
+                        groupBy={[]}
+                        groupable
+                        // header="Table Title"
+                        infiniteScroll
+                        onGroup={() => {}}
+                        onLoadMore={() => {}}
+                        onRowClick={(event) => {
+                          console.log("Row::", event.detail.row.original._id);
+                          //previewFormInModal(event.detail.row.original._id);
+                        }}
+                        onRowExpandChange={() => {}}
+                        onSort={() => {}}
+                        onTableScroll={() => {}}
+                        // selectedRowIds={{
+                        //     3: true,
+                        // }}
+                        selectionMode="SingleSelect"
+                        selectionBehavior="RowOnly"
+                        // tableHooks={[AnalyticalTableHooks.useManualRowSelect("isSelected")]}
+                        // markNavigatedRow={markNavigatedRow}
+                        onRowSelect={onRowSelect}
+                        // withRowHighlight
+                        // adjustTableHeightOnPopIn
+                        rowHeight={40}
+                        headerRowHeight={44}
+                        // retainColumnWidth
+                        // alternateRowColor
+                        withNavigationHighlight
+                      />
+                    </FlexBox>
                   </div>
                 </FlexBox>
               }
@@ -248,7 +276,9 @@ const ManageSalesOrder = () => {
                           onClick={() => setLayout("OneColumn")}
                         />
                       }
-                      startContent={<Title level="H5">Preview Sales Order</Title>}
+                      startContent={
+                        <Title level="H5">Preview Sales Order</Title>
+                      }
                     ></Bar>
                   }
                 >
@@ -261,7 +291,8 @@ const ManageSalesOrder = () => {
                       height: "90%",
                       verticalAlign: "middle",
                     }}
-                  ><ViewSalesOrder viewItem={viewItem} />
+                  >
+                    <ViewSalesOrder viewItem={viewItem} />
                     {/* <BusyIndicator active={formPreviewLoading}>
                       <PreviewForm
                         //open={openPreviewFormModal}

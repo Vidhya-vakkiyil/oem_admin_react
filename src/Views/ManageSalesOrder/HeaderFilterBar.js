@@ -18,16 +18,12 @@ import React, { useEffect, useState } from "react";
 import "@ui5/webcomponents-icons/dist/value-help.js";
 import HeaderFilterDialog from "./HeaderFilterDialog";
 
-export const HeaderFilterBar = (
-  field,
-  tableData,
-  settableData,
-  handleChange
-) => {
-  //const value = form[field.FieldName] || "";
+
+
+
+  export const HeaderFilterBar = ({ field, tableData, settableData,handleChange }) => {
   const [value, setvalue] = useState("");
   const [fieldName, setfieldName] = useState("");
-
   const [inputvalue, setInputValue] = useState([]);
   const [filterdialogOpen, setFilterDialogOpen] = useState(false);
 
@@ -67,7 +63,6 @@ export const HeaderFilterBar = (
     setInputValue(e.detail.item.innerHTML);
     setFilterDialogOpen(false);
   };
-
   switch (field.inputType) {
     case "text":
     case "number":

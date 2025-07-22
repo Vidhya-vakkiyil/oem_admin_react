@@ -1,11 +1,13 @@
-import { BusyIndicator, Card, FlexBox, MessageStrip, Text } from '@ui5/webcomponents-react'
+import { BusyIndicator, Card, FlexBox, List, ListItemStandard, MessageStrip, Text } from '@ui5/webcomponents-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFormById } from '../../../../store/slices/formmasterSlice';
+import { useNavigate } from 'react-router-dom';
 
 const ViewFormMaster = (props) => {
    const { id } = props;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
@@ -17,7 +19,10 @@ console.log("form",forms,id,form)
     const fetchData = async () => {
       try {
         if (!form) {
-          await dispatch(fetchFormById(id)).unwrap();
+          const res= await dispatch(fetchFormById(id)).unwrap();
+          if (res.message === "Please Login!") {
+          navigate("/login");
+        }
         }
       } catch (err) {
         setApiError("Failed to fetch form");
@@ -55,23 +60,23 @@ console.log("form",forms,id,form)
     );
   }
   return (
-   <Card style={{ margin: 10 }}>
+    <Card style={{ margin: "2rem" ,padding:"2rem"}}>
       
-
-      <FlexBox direction="Column" style={{ gap: "0.5rem" }}>
-        <Text>
+<List>
+        <ListItemStandard ><Text>
           <strong>Form Name:</strong> {form.name}
-        </Text>
-        <Text>
-          <strong>Display Name:</strong> {form.DisplayName}
-        </Text>
+        </Text></ListItemStandard>
+        <ListItemStandard ><Text>
+          <strong>Display Name:</strong> {form.display_name}
+        </Text></ListItemStandard>
       
         
-        <Text>
+       <ListItemStandard ><Text>
           <strong>Status:</strong>{" "}
           {form.status === "1" || form.status === 1 ? "Active" : "Inactive"}
-        </Text>
-      </FlexBox>
+        </Text></ListItemStandard>
+    
+      </List>
     </Card>
   )
 }

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchUserById } from "../../../../store/slices/usersSlice";
 import {
   BusyIndicator,
   Card,
   FlexBox,
+  List,
+  ListItemStandard,
   MessageStrip,
   Text,
   Title,
@@ -14,18 +16,22 @@ import {
 const ViewUser = (props) => {
   const { id } = props;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
 
   const { users } = useSelector((state) => state.users);
   const user = users.find((c) => c.id === id);
-console.log("user",users,id,user)
+  console.log("user", users, id, user);
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (!user) {
-          await dispatch(fetchUserById(id)).unwrap();
+          const res = await dispatch(fetchUserById(id)).unwrap();
+          if (res.message === "Please Login!") {
+            navigate("/login");
+          }
         }
       } catch (err) {
         setApiError("Failed to fetch user");
@@ -64,27 +70,35 @@ console.log("user",users,id,user)
   }
 
   return (
-    <Card style={{ margin: 10 }}>
-      
-
-      <FlexBox direction="Column" style={{ gap: "0.5rem" }}>
-        <Text>
-          <strong>First Name:</strong> {user.first_name}
-        </Text>
-        <Text>
-          <strong>Last Name:</strong> {user.last_name}
-        </Text>
-        <Text>
-          <strong>Email:</strong> {user.email}
-        </Text>
-        <Text>
-          <strong>Role:</strong> {user.Role?.name}
-        </Text>
-        <Text>
-          <strong>Status:</strong>{" "}
-          {user.status === "1" || user.status === 1 ? "Active" : "Inactive"}
-        </Text>
-      </FlexBox>
+    <Card style={{ margin: "1rem", padding: "1rem" }}>
+      <List>
+        <ListItemStandard>
+          <Text>
+            <strong>First Name:</strong> {user.first_name}
+          </Text>
+        </ListItemStandard>
+        <ListItemStandard>
+          <Text>
+            <strong>Last Name:</strong> {user.last_name}
+          </Text>
+        </ListItemStandard>
+        <ListItemStandard>
+          <Text>
+            <strong>Email:</strong> {user.email}
+          </Text>
+        </ListItemStandard>
+        <ListItemStandard>
+          <Text>
+            <strong>Role:</strong> {user.Role?.name}
+          </Text>
+        </ListItemStandard>
+        <ListItemStandard>
+          <Text>
+            <strong>Status:</strong>{" "}
+            {user.status === "1" || user.status === 1 ? "Active" : "Inactive"}
+          </Text>
+        </ListItemStandard>
+      </List>
     </Card>
   );
 };

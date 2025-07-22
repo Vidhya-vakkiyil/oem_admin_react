@@ -30,28 +30,32 @@ import { fetchForm } from "../../../../store/slices/formmasterSlice";
 
 // Validation schema
 const schema = yup.object().shape({
-  form_name: yup.string().required("CompanyForm name is required"),
-  display_name: yup.string().required("Display name is required"),
+  companyId: yup.string().required("CompanyId name is required"),
+  formId: yup.string().required("formId name is required"),
+  form_type: yup.string().required("TypeId name is required"),
+  status: yup.string().required("status name is required"),
+
 });
 
 const CompanyForm = ({
   onSubmit,
   defaultValues = {
-    companyId:"",
-    formId:"",
+    companyId: "",
+    formId: "",
     form_type: "",
+    status: "",
   },
   mode = "create",
   apiError,
 }) => {
   const {
-  control,
-  handleSubmit,
-  formState: { errors },
-} = useForm({
-  defaultValues,
-  resolver: yupResolver(schema), // ✅ fix here
-});
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    resolver: yupResolver(schema), // ✅ fix here
+  });
   const formRef = useRef(null);
   const onFormReady = useCallback((form) => {
     console.log("form ready", form);
@@ -61,6 +65,7 @@ const CompanyForm = ({
   const dispatch = useDispatch();
   const { companies } = useSelector((state) => state.companies);
   const { forms } = useSelector((state) => state.forms);
+  const { roles } = useSelector((state) => state.roles);
 
   const [assignBranchEnabled, setAssignBranchEnabled] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
@@ -80,10 +85,11 @@ const CompanyForm = ({
   useEffect(() => {
     dispatch(fetchCompanies());
     dispatch(fetchForm());
+    dispatch(fetchRoles());
   }, [dispatch]);
 
   useEffect(() => {
-    if (mode === "edit" && defaultValues?.branchIds.length > 0) {
+    if (mode === "edit") {
       setAssignBranchEnabled(true);
       setSelectedCompany(defaultValues.company || null);
       setSelectedBranchIds(defaultValues.branchIds || []);
@@ -101,9 +107,10 @@ const CompanyForm = ({
               <>
                 <Button
                   design="Emphasized"
-                   form="form" /* ← link button to that form id */
-                  type="Submit"  >
-                  {defaultValues.id ? "Update Company" : "Create Company"}
+                  form="form" /* ← link button to that form id */
+                  type="Submit"
+                >
+                  {mode==="edit" ? "Update Company" : "Create Company"}
                 </Button>
               </>
             }
@@ -142,14 +149,14 @@ const CompanyForm = ({
           }
         >
           <Title level="h4">
-            {defaultValues.id ? "Edit Company" : "Create New Company"}
+            {mode==="edit" ? "Edit Company" : "Create New Company"}
           </Title>
         </Bar>
       }
     >
       {apiError && (
         <MessageStrip
-          design="Negative" 
+          design="Negative"
           hideCloseButton={false}
           hideIcon={false}
           style={{ marginBottom: "1rem" }}
@@ -161,10 +168,11 @@ const CompanyForm = ({
       <form
         ref={formRef}
         id="form"
+        onFormReady={onFormReady}
         onSubmit={handleSubmit((formData) => {
+          console.log("formDataonsubmit", formData);
           const fullData = {
-            ...formData,
-            branchIds: selectedBranchIds,
+            ...formData
           };
           onSubmit(fullData); // you already pass it upward
         })}
@@ -173,15 +181,9 @@ const CompanyForm = ({
           wrap="Wrap" // allow line breaks
           style={{ gap: "1rem", paddingTop: "4rem" }}
         >
-          {" "}
-          
-          <FlexBox direction="Column" style={{ flex: "1 1 18%" }}>
+          <FlexBox direction="Column" style={{ flex: "48%" }}>
             <Label>Company</Label>
-            <FormItem
-              label={<Label required>Company</Label>}
-              style={{ flex: "1 1 48%" }}
-            >
-              {console.log("companies", companies, forms)}
+            <FormItem label={<Label required>companyId</Label>}>
               <Controller
                 name="companyId"
                 control={control}
@@ -192,6 +194,7 @@ const CompanyForm = ({
                     onChange={(e) => field.onChange(e.target.value)}
                     valueState={errors.companyId ? "Error" : "None"}
                   >
+                    <Option>Select</Option>
                     {companies
                       .filter((r) => r.status) /* active roles only    */
                       .map((r) => (
@@ -213,22 +216,20 @@ const CompanyForm = ({
               )}
             </FormItem>
           </FlexBox>
-          <FlexBox direction="Column" style={{ flex: "1 1 18%" }}>
-            <Label> Form </Label>
-            <FormItem
-              label={<Label required>Form</Label>}
-              style={{ flex: "1 1 48%" }}
-            >
+          <FlexBox direction="Column" style={{ flex: "48%" }}>
+            <Label>Form</Label>
+            <FormItem label={<Label required>formId</Label>}>
               <Controller
                 name="formId"
                 control={control}
                 render={({ field }) => (
                   <Select
-                    name="companyId"
+                    name="formId"
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value)}
-                    valueState={errors.companyId ? "Error" : "None"}
-                  >
+                    valueState={errors.formId ? "Error" : "None"}
+                  >{console.log("formId",field)}
+                    <Option>Select</Option>
                     {forms
                       .filter((r) => r.status) /* active roles only    */
                       .map((r) => (
@@ -240,55 +241,79 @@ const CompanyForm = ({
                 )}
               />
 
-              {errors.companyId && (
+              {errors.formId && (
                 <span
                   slot="valueStateMessage"
                   style={{ color: "var(--sapNegativeColor)" }}
                 >
-                  {errors.companyId.message}
+                  {errors.formId.message}
                 </span>
               )}
             </FormItem>
           </FlexBox>
-          <FlexBox direction="Column" style={{ flex: "1 1 18%" }}>
+          <FlexBox direction="Column" style={{ flex: "48%" }}>
             <Label>Form Type</Label>
-            <FormItem
-              label={<Label required>Form Type</Label>}
-              style={{ flex: "28%" }}
-            >
+            <FormItem label={<Label required>TypeId</Label>}>
               <Controller
-                name="TypeId"
+                name="form_type"
                 control={control}
                 render={({ field }) => (
                   <Select
-                    name="typeId"
+                    name="form_type"
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value)}
-                    valueState={errors.companyId ? "Error" : "None"}
+                    valueState={errors.form_type ? "Error" : "None"}
                   >
-                    <Option key={"Item"} value={"Item"}>
-                      Item
-                    </Option>
-                    <Option key={"Service"} value={"Service"}>
-                      Service
-                    </Option>
-                    <Option key={"Both"} value={"Both"}>
-                      Both
-                    </Option>
+                    <Option>Select</Option>
+                    <Option value={"Item"}>{"Item"}</Option>
+                    <Option value={"Service"}>{"Service"}</Option>
+                    <Option value={"Both"}>{"Both"}</Option>
                   </Select>
                 )}
               />
 
-              {errors.companyId && (
+              {errors.form_type && (
                 <span
                   slot="valueStateMessage"
                   style={{ color: "var(--sapNegativeColor)" }}
                 >
-                  {errors.companyId.message}
+                  {errors.form_type.message}
                 </span>
               )}
             </FormItem>
+            
           </FlexBox>
+          <FlexBox direction="Column" style={{ flex: " 48%" }}>
+              <Label>Status</Label>
+              <FormItem label={<Label required>Status</Label>}>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      name="status"
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      valueState={errors.status ? "Error" : "None"}
+                    >
+                      <Option>Select</Option>
+
+                      <Option value="1">Active</Option>
+                      <Option value="0">Inactive</Option>
+                    </Select>
+                  )}
+                />
+
+                {errors.status && (
+                  <span
+                    slot="valueStateMessage"
+                    style={{ color: "var(--sapNegativeColor)" }}
+                  >
+                    {errors.status.message}
+                  </span>
+                )}
+              </FormItem>
+            </FlexBox>
         </FlexBox>
       </form>
     </Page>

@@ -33,7 +33,10 @@ const EditUser = () => {
     const fetchData = async () => {
       try {
         if (!user) {
-          await dispatch(fetchUserById(id)).unwrap();
+          const res = await dispatch(fetchUserById(id)).unwrap();
+          if (res.message === "Please Login!") {
+            navigate("/login");
+          }
         }
       } catch (err) {
         setApiError("Failed to fetch user");
@@ -46,7 +49,12 @@ const EditUser = () => {
 
   const handleUpdate = async (data) => {
     try {
-      await dispatch(updateUser({ id, data })).unwrap();
+      const res = await dispatch(updateUser({ id, data })).unwrap();
+      if (res.message === "Please Login!") {
+        navigate("/login");
+      } else {
+        navigate("/users");
+      }
       navigate("/users");
     } catch (error) {
       setApiError("Failed to update user");

@@ -12,9 +12,12 @@ const CreateCompany = () => {
   const handleCreate = async (data) => {
     console.log("handlecreate", data);
     try {
-      
-      await dispatch(createCompany(data)).unwrap();
-      navigate("/admin/companies");
+      const res = await dispatch(createCompany(data)).unwrap();
+      if (res.message === "Please Login!") {
+        navigate("/login");
+      } else {
+        navigate("/admin/companies");
+      }
     } catch (error) {
       console.error(error);
     }

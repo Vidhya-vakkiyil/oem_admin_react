@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchUserById } from "../../../../store/slices/usersSlice";
 import {
   BusyIndicator,
   Card,
   FlexBox,
+  List,
+  ListItemStandard,
   MessageStrip,
   Text,
   Title,
@@ -15,18 +17,22 @@ import { fetchCompanyFormsById } from "../../../../store/slices/CompanyFormSlice
 const ViewCompany = (props) => {
   const { id } = props;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
 
   const { companies } = useSelector((state) => state.companies);
   const company = companies.find((c) => c.id === id);
-console.log("company",companies,id,company)
+  console.log("company", companies, id, company);
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (!company) {
-          await dispatch(fetchCompanyFormsById(id)).unwrap();
+          const res = await dispatch(fetchCompanyFormsById(id)).unwrap();
+          if (res.message === "Please Login!") {
+            navigate("/login");
+          }
         }
       } catch (err) {
         setApiError("Failed to fetch company");
@@ -65,29 +71,35 @@ console.log("company",companies,id,company)
   }
 
   return (
-    <Card style={{ margin: 10 }}>
-      
+    <Card style={{ margin: "1rem", padding: "1rem" }}>
+      <List>
+        <ListItemStandard>
+          <Text>
+            <strong>Company Name:</strong> {company.name}
+          </Text>
+        </ListItemStandard>
+        <ListItemStandard>
+          <Text>
+            <strong>City:</strong> {company.city}
+          </Text>
+        </ListItemStandard>
+        <ListItemStandard>
+          <Text>
+            <strong>Address:</strong> {company.address}
+          </Text>
+        </ListItemStandard>
 
-      <FlexBox direction="Column" style={{ gap: "0.5rem" }}>
-        <Text>
-          <strong>Company Name:</strong> {company.name}
-        </Text>
-        <Text>
-          <strong>City:</strong> {company.city}
-        </Text>
-        <Text>
-          <strong>Address:</strong> {company.address}
-        </Text>
-        
-        <Text>
-          <strong>Status:</strong>{" "}
-          {company.status === "1" || company.status === 1 ? "Active" : "Inactive"}
-        </Text>
-      </FlexBox>
+        <ListItemStandard>
+          <Text>
+            <strong>Status:</strong>{" "}
+            {company.status === "1" || company.status === 1
+              ? "Active"
+              : "Inactive"}
+          </Text>
+        </ListItemStandard>
+      </List>
     </Card>
   );
 };
 
-
-
-export default ViewCompany
+export default ViewCompany;

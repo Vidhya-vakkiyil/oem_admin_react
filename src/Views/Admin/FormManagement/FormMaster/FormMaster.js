@@ -39,7 +39,10 @@ const FormMaster = () => {
       )
     ) {
       try {
-        await dispatch(deleteForm(form.id)).unwrap();
+        const res = await dispatch(deleteForm(form.id)).unwrap();
+        if (res.message === "Please Login!") {
+          navigate("/login");
+        }
       } catch (error) {
         console.error("Error deleting form:", error);
       }
@@ -200,7 +203,7 @@ const FormMaster = () => {
                       columns={columns}
                       data={filteredRows || []}
                       header={"  FormMaster list(" + filteredRows.length + ")"}
-                      visibleRows={5}
+                      visibleRows={8}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
                       onGroup={() => {}}

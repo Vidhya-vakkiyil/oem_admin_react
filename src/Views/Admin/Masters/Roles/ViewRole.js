@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchRoleById } from "../../../../store/slices/roleSlice";
 import {
   BusyIndicator,
@@ -14,6 +14,7 @@ import {
 const ViewRole = (props) => {
   const { id } = props;
   const dispatch = useDispatch();
+  const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
@@ -25,7 +26,10 @@ console.log("role",roles,id,role)
     const fetchData = async () => {
       try {
         if (!role) {
-          await dispatch(fetchRoleById(id)).unwrap();
+          const res = await dispatch(fetchRoleById(id)).unwrap();
+          if (res.message === "Please Login!") {
+          navigate("/login");
+        }
         }
       } catch (err) {
         setApiError("Failed to fetch role");
@@ -64,20 +68,20 @@ console.log("role",roles,id,role)
   }
 
   return (
-    <Card style={{ margin: 10 }}>
+     <Card style={{ margin: "1rem" ,padding:"1rem"}}>
       
 
       <FlexBox direction="Column" style={{ gap: "0.5rem" }}>
         <Text>
-          <strong>Role Name:</strong> {role.name}
+          <strong>Role Name:</strong><Title level="h6"> {role.name}</Title>
         </Text>
         <Text>
-         <strong>Permissions:</strong> {role.Permissions.map(perm=><> {perm.name}</>)}
+         <strong>Permissions:</strong> {role.Permissions.map(perm=><FlexBox direction="Column"><Title level="h6">{perm.name}</Title> </FlexBox>)}
         </Text>
       
         <Text>
           <strong>Status:</strong>{" "}
-          {role.status === "1" || role.status === 1 ? "Active" : "Inactive"}
+          <Title level="h6">{role.status === "1" || role.status === 1 ? "Active" : "Inactive"}</Title>
         </Text>
       </FlexBox>
     </Card>

@@ -159,7 +159,7 @@ export default function SalesOrder() {
                 <Button design="Positive" onClick={() => handleSubmit()}>
                   Submit
                 </Button>
-                <Button design="Positive" onClick={() => navigate("/")}>
+                <Button design="Positive" onClick={() => navigate("/ManageSalesOrder")}>
                   Cancel
                 </Button>
               </>
@@ -218,7 +218,7 @@ export default function SalesOrder() {
               
             <Breadcrumbs>
               <BreadcrumbsItem>Home</BreadcrumbsItem>
-              <BreadcrumbsItem onClick={navigate("/")}>
+              <BreadcrumbsItem onClick={navigate("/ManageSalesOrder")}>
                 Manage Sales Order
               </BreadcrumbsItem>
               <BreadcrumbsItem>Sales Order</BreadcrumbsItem>
@@ -232,7 +232,7 @@ export default function SalesOrder() {
               
               
               <ToolbarButton
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/ManageSalesOrder")}
                 design="Transparent"
                 icon="decline"
               />
