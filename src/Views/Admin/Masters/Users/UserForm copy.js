@@ -45,7 +45,7 @@ const schema = yup.object().shape({
 });
 
 const UserForm = ({
-  onSubmitCreate,
+  onSubmit,
   defaultValues = {
     first_name: "",
     last_name: "",
@@ -56,7 +56,6 @@ const UserForm = ({
     assignBranches: false,
     company: null,
     branchIds: [],
-    adddetail:[]
   },
   mode = "create",
   apiError,
@@ -83,11 +82,6 @@ const UserForm = ({
   const [company, setCompany] = useState("");
   const [selectedBranches, setSelectedBranches] = useState([]);
   const [addDetailDialog, setaddDetailDialog] = useState(false);
-  const [addDetail, setAddDetail] = useState({
-    companyId: "",  
-    formId: "",
-    branchId: "",
-  });
 
   const navigate = useNavigate();
   const handleCheckboxToggle = (branch) => {
@@ -105,12 +99,6 @@ const handleAddDetails = () => {
   };
 const handleUserDetails=(data)  => {
     console.log("User details submitted", data);
-    setAddDetail({
-      companyId: data.companyId,  
-      formId: data.formId,
-      branchId: data.branchId,
-    });
-    setaddDetailDialog(false); // Close the dialog after submission
     // You can handle the user details submission here
   };
 
@@ -217,9 +205,8 @@ const handleUserDetails=(data)  => {
           const fullData = {
             ...formData,
             branchIds: selectedBranchIds,
-            adddetail: addDetail, // include addDetail in the form data
           };
-          onSubmitCreate(fullData); // you already pass it upward
+          onSubmit(fullData); // you already pass it upward
         })}
       >
         <FlexBox
@@ -229,7 +216,7 @@ const handleUserDetails=(data)  => {
           <FlexBox direction="Column" style={{ flex: " 48%" }}>
             <Label>First Name</Label>
             <Controller
-              name="first_name"
+              name="name"
               control={control}
               render={({ field }) => (
                 <FormItem
@@ -238,15 +225,15 @@ const handleUserDetails=(data)  => {
                 >
                   <Input
                     placeholder="First Name"
-                    name="first_name"
+                    name="name"
                     value={field.value ?? ""} // controlled value
                     onInput={(e) => field.onChange(e.target.value)} // update RHF
-                    valueState={errors.first_name ? "Error" : "None"} // red border on error
+                    valueState={errors.name ? "Error" : "None"} // red border on error
                   >
-                    {errors.first_name && (
+                    {errors.name && (
                       /* UI5 shows this automatically when valueState="Error" */
                       <span slot="valueStateMessage">
-                        {errors.first_name.message}
+                        {errors.name.message}
                       </span>
                     )}
                   </Input>
@@ -421,14 +408,6 @@ const handleUserDetails=(data)  => {
           }}
         />
 
-        {/* <AssignBranch
-          assignEnabled={assignBranchEnabled}
-          setAssignEnabled={setAssignBranchEnabled}
-          selectedCompany={selectedCompany}
-          setSelectedCompany={setSelectedCompany}
-          selectedBranchIds={selectedBranchIds}
-          setSelectedBranchIds={setSelectedBranchIds}
-        /> */}
         <FlexBox
           direction="Column"
           style={{ marginTop: "2rem", gap: "0.5rem" }}

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import RoleForm from "./RoleForm";
-import { createRole } from "../../../../store/slices/roleSlice";
+import UserRoleMenuForm from "./UserRoleMenuForm";
 
 import { fetchPermissions } from "../../../../store/slices/permissionSlice";
 
-const CreateRole = () => {
+const CreateUserRoleMenu = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { permissions } = useSelector((state) => state.permissions);
@@ -33,18 +32,18 @@ const CreateRole = () => {
   const handleCreate = async (data) => {
     console.log("handlecreate", data);
     try {
-      const res = await dispatch(createRole(data)).unwrap();
+      const res ='';// await dispatch(createUserRoleMenu(data)).unwrap();
       if (res.message === "Please Login!") {
         navigate("/login");
       } else {
-        navigate("/admin/roles");
+        navigate("/admin/UserRoleMenus");
       }
     } catch (error) {
       console.error(error);
     }
   };
   return (
-    <RoleForm
+    <UserRoleMenuForm
       onSubmit={handleCreate}
       defaultValues={{ name: "", status: "1", permissionIds: [] }}
       permissions={permissions}
@@ -54,4 +53,4 @@ const CreateRole = () => {
   );
 };
 
-export default CreateRole;
+export default CreateUserRoleMenu

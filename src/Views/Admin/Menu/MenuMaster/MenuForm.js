@@ -25,18 +25,23 @@ import {
   Title,
 } from "@ui5/webcomponents-react";
 import { useNavigate } from "react-router-dom";
+import { fetchUserMenus } from "../../../../store/slices/usermenusSlice";
 
 // Validation schema
 const schema = yup.object().shape({
-  form_name: yup.string().required("Menu name is required"),
+  name: yup.string().required("Menu name is required"),
   display_name: yup.string().required("Display name is required"),
 });
 
 const MenuForm = ({
   onSubmit,
   defaultValues = {
-    menuform_name: "",
+    name: "",
     display_name: "",
+    order_number:"",
+    form: "", 
+    parent: "",
+    status: "1",  
   },
   mode = "create",
   apiError,
@@ -53,6 +58,7 @@ const MenuForm = ({
 
   const dispatch = useDispatch();
   const { roles } = useSelector((state) => state.roles);
+  const {usermenus} = useSelector((state) => state.usermenus);
   const [assignBranchEnabled, setAssignBranchEnabled] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedBranchIds, setSelectedBranchIds] = useState([]);
@@ -69,11 +75,26 @@ const MenuForm = ({
   };
 
   useEffect(() => {
-    dispatch(fetchRoles());
+    //dispatch(fetchRoles());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchRoles()).unwrap();
+        dispatch(fetchUserMenus());
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
 
   useEffect(() => {
-    if (mode === "edit" && defaultValues?.branchIds.length > 0) {
+    if (mode === "edit" ) {
       setAssignBranchEnabled(true);
       setSelectedCompany(defaultValues.company || null);
       setSelectedBranchIds(defaultValues.branchIds || []);
@@ -94,7 +115,7 @@ const MenuForm = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {mode==="edit" ? "Update MenuForm" : "Create MenuForm"}
+                  {mode === "edit" ? "Update MenuForm" : "Create MenuForm"}
                 </Button>
               </>
             }
@@ -112,7 +133,7 @@ const MenuForm = ({
             />
           }
           startContent={
-            <div style={{ width: "200px" }}>
+            <div style={{ width: "300px" }}>
               <Breadcrumbs
                 design="Standard"
                 onItemClick={(e) => {
@@ -133,7 +154,7 @@ const MenuForm = ({
           }
         >
           <Title level="h4">
-            {mode==="edit" ? "Edit MenuForm" : "Create New MenuForm"}
+            {mode === "edit" ? "Edit MenuForm" : "Create New MenuForm"}
           </Title>
         </Bar>
       }
@@ -167,7 +188,7 @@ const MenuForm = ({
           <FlexBox direction="Column" style={{ flex: " 28%" }}>
             <Label>MenuForm Name</Label>
             <Controller
-              name="menuform_name"
+              name="name"
               control={control}
               render={({ field }) => (
                 <FormItem
@@ -176,15 +197,15 @@ const MenuForm = ({
                 >
                   <Input
                     placeholder="MenuForm Name"
-                    name="form_name"
+                    name="name"
                     value={field.value ?? ""} // controlled value
                     onInput={(e) => field.onChange(e.target.value)} // update RHF
-                    valueState={errors.form_name ? "Error" : "None"} // red border on error
+                    valueState={errors.name ? "Error" : "None"} // red border on error
                   >
-                    {errors.form_name && (
+                    {errors.name && (
                       /* UI5 shows this automatically when valueState="Error" */
                       <span slot="valueStateMessage">
-                        {errors.form_name.message}
+                        {errors.name.message}
                       </span>
                     )}
                   </Input>
@@ -219,7 +240,69 @@ const MenuForm = ({
               )}
             />
           </FlexBox>
-          <FlexBox direction="Column" style={{ flex: " 28%" }}>
+            <FlexBox direction="Column" style={{ flex: " 28%" }}>
+            <Label>Order Number</Label>
+            <Controller
+              name="order_number"
+              control={control}
+              render={({ field }) => (
+                <FormItem
+                  label={<Label required>Label Text</Label>}
+                  style={{ flex: "48%" }}
+                >
+                  <Input
+                    placeholder="Order Number"
+                    type="number"
+                    name="order_number"
+                    value={field.value ?? ""} // controlled value
+                    onInput={(e) => field.onChange(e.target.value)} // update RHF
+                    valueState={errors.order_number ? "Error" : "None"} // red border on error
+                  >
+                    {errors.order_number && (
+                      /* UI5 shows this automatically when valueState="Error" */
+                      <span slot="valueStateMessage">
+                        {errors.order_number.message}
+                      </span>
+                    )}
+                  </Input>
+                </FormItem>
+              )}
+            />
+          </FlexBox>
+          <FlexBox direction="Column" style={{ flex: " 48%" }}>
+            <Label>Parent</Label>
+            <FormItem label={<Label required>Parent</Label>}>
+            <Controller
+              name="parent"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  name="parent"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  valueState={errors.parent ? "Error" : "None"}
+                >
+                  <Option value="">Select</Option>
+                  {usermenus
+                    .map((item) => (
+                      <Option key={item.id} value={item.id}>
+                        {item.display_name}
+                      </Option>
+                    ))}
+                </Select>
+              )}
+            />
+            {errors.parent && (
+              <span
+                slot="valueStateMessage"
+                style={{ color: "var(--sapNegativeColor)" }}
+              >
+                {errors.parent.message}
+              </span>
+            )}
+            </FormItem>
+          </FlexBox>
+          <FlexBox direction="Column" style={{ flex: " 48%" }}>
             <Label>Status</Label>{" "}
             <FormItem label={<Label required>Status</Label>}>
               <Controller
@@ -256,5 +339,4 @@ const MenuForm = ({
   );
 };
 
-
-export default MenuForm
+export default MenuForm;

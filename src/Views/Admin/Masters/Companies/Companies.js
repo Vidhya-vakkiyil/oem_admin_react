@@ -33,7 +33,21 @@ const Companies = () => {
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchCompanies());
+    //dispatch(fetchCompanies());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchCompanies()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   const handleDelete = async (company) => {
     if (window.confirm(`Are you sure to delete user: ${company.name}?`)) {
@@ -80,7 +94,7 @@ const Companies = () => {
         Header: "Address",
         accessor: "address",
       },
-      
+
       {
         Header: "Status",
         accessor: "status",

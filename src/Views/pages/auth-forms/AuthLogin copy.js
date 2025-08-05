@@ -20,9 +20,6 @@ import {
   Label,
   MessageStrip,
   Title,
-  FlexBoxDirection,
-  FlexBoxAlignItems,
-  FlexBoxJustifyContent,
 } from "@ui5/webcomponents-react";
 
 export default function AuthLogin() {
@@ -69,41 +66,24 @@ export default function AuthLogin() {
   };
 
   return (
-   
-      <FlexBox
-        style={{
-          display: "flex",
-          height: "100vh",
-          fontFamily: "Segoe UI, sans-serif",
-        }}
-      >
-
-        {/* Right Section */}
-        <FlexBox
-          style={{
-            flex: 1,
-            background: "#f9f9f9",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "2rem",
-            textAlign: "center",
-          }}
+    <>
+      {console.log("error", error)}
+      {error && (
+        <MessageStrip
+          design="Negative" // For "error" severity
+          hideCloseButton={false}
+          hideIcon={false}
+          style={{ marginBottom: "1rem" }}
         >
-          {/* Illustration - Replace with your own if needed */}
-          <img
-            src="https://tonysourcing.com/wp-content/uploads/2021/11/OEM.jpg"
-            alt="MFA illustration"
-            style={{ width: "60%", marginBottom: "2rem" }}
-          />
-          <Title level="H5">MFA for all accounts</Title>
-          <FlexBox style={{ maxWidth: "400px", color: "#444", margin: "1rem 0" }}>
-            Secure online accounts with OneAuth 2FA. Back up OTP secrets and
-            never lose access to your accounts.
-          </FlexBox>
-          <Button design="Transparent">Learn more</Button>
-        </FlexBox>
+          {error.message}
+        </MessageStrip>
+      )}
+      <FlexBox
+        direction="Column"
+        justifyContent="Center"
+        alignItems="Center"
+        style={{ height: "90vh", backgroundColor: "#f3f6f9" }}
+      >
         <Card
           style={{
             padding: "2rem",
@@ -132,19 +112,14 @@ export default function AuthLogin() {
             >
               OEM
             </Title> */}
-            <img
-              width={"50px"}
-              alt="person-placeholder"
-              src="https://cdn.vectorstock.com/i/2000v/40/54/oem-original-equipment-manufacturing-vector-45464054.avif"
-            />
+             <img 
+             width={"50px"}
+                alt="person-placeholder"
+                src="https://cdn.vectorstock.com/i/2000v/40/54/oem-original-equipment-manufacturing-vector-45464054.avif"
+              />
             <Title
               level="H5"
-              style={{
-                fontSize: "1rem",
-                color: "#7e57c2",
-                marginBottom: "0.25rem",
-                marginTop: "1rem",
-              }}
+              style={{ fontSize: "1rem",color: "#7e57c2", marginBottom: "0.25rem",marginTop:"1rem" }}
             >
               Hi, Welcome Back
             </Title>
@@ -165,43 +140,39 @@ export default function AuthLogin() {
             </MessageStrip>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              maxWidth: "400px",
-              margin: "auto",
-              marginTop: "4rem",
-              padding: "1rem",
-            }}
-          >
+          <FlexBox direction="Column" style={{ width: "100%", gap: "0.5rem" }}>
+            {/* Email Row */}
             <FlexBox
-              direction={FlexBoxDirection.Column}
-              alignItems={FlexBoxAlignItems.Center}
+              direction="Column"
+              alignItems="Center"
+              style={{ gap: "0.5rem" }}
             >
-              <Title level="H4">Sign in</Title>
-
-              <Label for="email">Email Address</Label>
               <Input
-                id="email"
-                name="email"
+                style={{ width: "80%" }}
                 type="Email"
-                placeholder="Enter your email"
-                required
+                value={credentials.email}
+                name="email"
+                placeholder="Enter email"
                 onInput={(e) =>
                   handleChange({
                     target: { name: "email", value: e.target.value },
                   })
                 }
-                style={{ width: "100%", marginBottom: "1rem" }}
               />
+            </FlexBox>
 
-              <Label for="password">Password</Label>
+            {/* Password Row */}
+            <FlexBox
+              direction="Column"
+              alignItems="Center"
+              style={{ gap: "1rem" }}
+            >
               <Input
-                id="password"
+                style={{ width: "80%" }}
+                type={showPassword ? "Text" : "Password"}
+                value={credentials.password}
                 name="password"
-                type="Password"
-                placeholder="Enter your password"
-                required
+                placeholder="Enter password"
                 onInput={(e) =>
                   handleChange({
                     target: { name: "password", value: e.target.value },
@@ -210,47 +181,59 @@ export default function AuthLogin() {
                 icon={<Icon name={showPassword ? "hide" : "show"} />}
                 onIconClick={() => setShowPassword(!showPassword)}
                 showIcon
-                style={{ width: "100%", marginBottom: "1rem" }}
               />
-
-              <CheckBox
-                name="remember"
-                text="Remember me"
-                checked={checked}
-                onChange={(e) => setChecked(e.target.checked)}
-                style={{ alignSelf: "flex-start", marginBottom: "1rem" }}
-              />
-
-              <Button
-                type="Submit"
-                design="Emphasized"
-                style={{ width: "100%" }}
-              >
-                Sign In
-              </Button>
-
-              <FlexBox
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%",
-                  marginTop: "1rem",
-                }}
-              >
-                <Link
-                  href="/forgot-password"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate("/forgot-password");
-                  }}
-                >
-                  Forgot password?
-                </Link>
-                <Link href="#">Don't have an account? Sign Up</Link>
-              </FlexBox>
             </FlexBox>
-          </form>
+          </FlexBox>
+
+          <FlexBox
+            justifyContent="SpaceBetween"
+            alignItems="Center"
+            style={{
+              marginLeft: "2rem",
+              marginBottom: "1rem",
+              marginTop: "1rem",
+            }}
+            direction="Row"
+          >
+            <CheckBox
+              text="Keep me logged in"
+              checked={checked}
+              onChange={(e) => setChecked(e.target.checked)}
+            />
+          
+            <Link
+              href="/forgot-password"
+              design="Emphasized"
+              style={{ textDecoration: "none", marginRight: "2rem" }}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/forgot-password");
+              }}
+            >
+              Forgot Password?
+            </Link>{" "}
+          </FlexBox>
+
+          <FlexBox alignItems="Center">
+            <Button
+              design="Emphasized"
+              disabled={status === "loading"}
+              onClick={handleSubmit} // Replace with your form submit handler
+              style={{
+                width: "80%",
+                marginLeft: "2.5rem",
+                marginBottom: "2rem",
+              }}
+            >
+              {status === "loading" ? (
+                <BusyIndicator size="Small" active />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </FlexBox>
         </Card>
       </FlexBox>
+    </>
   );
 }

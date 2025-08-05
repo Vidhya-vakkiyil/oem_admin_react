@@ -20,15 +20,16 @@ export default function ForgotPassword() {
         <Card
           style={{
             padding: '2rem',
-            maxWidth: '480px',
-            width: '100%',
+            width: '400px',
             boxShadow: 'var(--sapContent_Shadow1)',
           }}
         >
           <FlexBox direction="Column" style={{ gap: '1.5rem', alignItems: 'center' }}>
-            <Link style={{ textDecoration: 'none' }}>
-              <Title level="H2">OEM</Title>
-            </Link>
+            <img 
+             width={"50px"}
+                alt="person-placeholder"
+                src="https://cdn.vectorstock.com/i/2000v/40/54/oem-original-equipment-manufacturing-vector-45464054.avif"
+              />
 
             <FlexBox direction="Column" style={{ alignItems: 'center', textAlign: 'center', gap: '0.5rem' }}>
               <Title level="H3">Forgot password?</Title>

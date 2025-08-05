@@ -88,9 +88,6 @@ const CompanyFormFieldForms = ({
   const { companyformfield } = useSelector((state) => state.companyformfield);
   const formFieldValues = formField.find((c) => c.id === formfieldId);
   const [formfieldpageOpen, setformFieldpageopen] = useState(false);
-  const [editformfieldDialog, seteditformfielddialog] = useState(false);
-  const [layout, setLayout] = useState("OneColumn");
-  const [ViewId, setViewId] = useState("");
 
   console.log("formFieldValues", formFieldValues, formField);
 
@@ -115,11 +112,23 @@ const CompanyFormFieldForms = ({
   };
 
   useEffect(() => {
-    dispatch(fetchForm());
-    dispatch(fetchFormSection());
-    dispatch(fetchCompanies());
-    dispatch(fetchFormFields());
-    dispatch(fetchCompanyForms());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchFormSection()).unwrap();
+        console.log("resusers", res);
+        dispatch(fetchForm());
+        dispatch(fetchCompanies());
+        dispatch(fetchFormFields());
+        dispatch(fetchCompanyForms());
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
 
   const [filteredFormFields, setFilteredFormFields] = useState(formField);
@@ -151,41 +160,7 @@ const CompanyFormFieldForms = ({
   }, [formfieldId, formField, setValue]);
   const [editformfielddetails, seteditformfielddetails] = useState([]);
   const [editfield, setEditfield] = useState([]);
-  const handleEdit = (user) => {
-    console.log("handleedit", user);
-    setEditfield(user);
-    seteditformfielddialog(true);
-    setformFieldpageopen(true);
 
-    seteditformfielddetails({
-      formSectionId: user.FormSection?.id,
-      field_name: user.field_name,
-      display_name: user.display_name,
-      input_type: user.input_type,
-      field_order: user.field_order,
-      is_visible: JSON.stringify(user.is_visible),
-      is_field_data_bind: JSON.stringify(user.is_field_data_bind),
-      bind_data_by: user.bind_data_by,
-      status: JSON.stringify(user.status),
-    });
-  };
-  const handleView = (user) => {
-    //navigate(`/company-forms/${user.id}`);
-    setViewId(user.id);
-  };
-  const handleDelete = async (companyformfield) => {
-    if (
-      window.confirm(
-        `Are you sure to delete user: ${companyformfield.companyId}?`
-      )
-    ) {
-      try {
-        // const res = await dispatch(deleteCompanyFormsFields(companyformfield.id)).unwrap();
-      } catch (error) {
-        console.error("Error deleting user:", error);
-      }
-    }
-  };
   const columns = useMemo(
     () => [
       {
@@ -223,54 +198,11 @@ const CompanyFormFieldForms = ({
         Header: "Status",
         accessor: "status",
         Cell: ({ row }) =>
-          row.original.status === "1" ? (
+          row.original.status === "1" || row.original.status === 1 ? (
             <Tag children="Active" design="Positive" size="S" />
           ) : (
             <Tag children="Inactive" design="Negative" size="S" />
           ),
-        
-      },
-      {
-        Header: "Actions",
-        accessor: ".",
-        disableFilters: true,
-        disableGroupBy: true,
-        disableResizing: true,
-        disableSortBy: true,
-        id: "actions",
-        width: 120,
-
-        Cell: (instance) => {
-          const { cell, row, webComponentsReactProperties } = instance;
-          const isOverlay = webComponentsReactProperties.showOverlay;
-          return (
-            <FlexBox alignItems="Center">
-              <Button
-                icon="sap-icon://edit"
-                disabled={isOverlay}
-                design="Transparent"
-                //onClick={() => { setLayout("TwoColumnsMidExpanded");setViewItem(row.original)}}
-                onClick={() => handleEdit(row.original)}
-              />
-              <Button
-                icon="sap-icon://delete"
-                disabled={isOverlay}
-                design="Transparent"
-                //onClick={() => { setLayout("TwoColumnsMidExpanded");setViewItem(row.original)}}
-                onClick={() => handleDelete(row.original)}
-              />
-              <Button
-                icon="sap-icon://navigation-right-arrow"
-                disabled={isOverlay}
-                design="Transparent"
-                onClick={() => {
-                  setLayout("TwoColumnsMidExpanded");
-                  handleView(row.original);
-                }}
-              />
-            </FlexBox>
-          );
-        },
       },
     ],
     []
@@ -318,7 +250,7 @@ const CompanyFormFieldForms = ({
     setFormFieldList(updatedList);
   };
   const handleselectedCompany = (company) => {
-    console.log("handleselectedCompany", companyforms,company);
+    console.log("handleselectedCompany", companyforms, company);
     const companyformList = companyforms.filter(
       (r) => r.status && company === r.Company.id
     );
@@ -338,7 +270,9 @@ const CompanyFormFieldForms = ({
       ...fieldList,
       ...fieldListfromMaster,
     ]);
-    setFormFieldList([...fieldList, ...fieldListfromMaster]);
+    fieldList.length > 0
+      ? setFormFieldList([...fieldList])
+      : setFormFieldList([...fieldListfromMaster]);
     console.log("handleFormfieldList", fieldList);
   };
   useEffect(() => {
@@ -394,7 +328,7 @@ const CompanyFormFieldForms = ({
                     CompanyFormFields
                   </BreadcrumbsItem>
                   <BreadcrumbsItem data-route="admin/CompanyFormFields/create/">
-                    Create Form Fields
+                    {mode === "edit" ? "Edit Form Field" : "Create Form Field"}
                   </BreadcrumbsItem>
                 </Breadcrumbs>
               </div>
@@ -525,14 +459,18 @@ const CompanyFormFieldForms = ({
               <div style={{ width: "99%" }}>
                 <FlexBox direction="Column">
                   <FlexBox style={{ justifyContent: "start" }}>
-                    <Button
-                      design="Emphasized"
-                      onClick={() => {
-                        AddNewField();
-                      }}
-                    >
-                      Add
-                    </Button>
+                    {mode === "create" ? (
+                      <Button
+                        design="Emphasized"
+                        onClick={() => {
+                          AddNewField();
+                        }}
+                      >
+                        Add
+                      </Button>
+                    ) : (
+                      <></>
+                    )}
                   </FlexBox>
                   <AnalyticalTable
                     columns={columns}
@@ -557,22 +495,13 @@ const CompanyFormFieldForms = ({
         </form>
       </Page>
       {console.log("defaultValues", defaultValues)}
-      {editformfieldDialog ? (
-        <EditFormfield
-          formfieldpageOpen={formfieldpageOpen}
-          setformFieldpageopen={setformFieldpageopen}
-          onSubmit={handleEditCompanyFormfield}
-          mode="edit"
-          defaultValues={editformfielddetails}
-        />
-      ) : (
-        <AddFormField
-          formfieldpageOpen={formfieldpageOpen}
-          setformFieldpageopen={setformFieldpageopen}
-          onSubmit={handleCreateFormfield}
-          mode="create"
-        />
-      )}
+
+      <AddFormField
+        formfieldpageOpen={formfieldpageOpen}
+        setformFieldpageopen={setformFieldpageopen}
+        onSubmitFormField={handleCreateFormfield}
+        mode="create"
+      />
 
       {console.log("formfieldIdsend", formfieldId)}
     </>

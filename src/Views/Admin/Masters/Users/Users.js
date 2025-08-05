@@ -30,8 +30,22 @@ const Users = () => {
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchUsers());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchUsers()).unwrap();
+        console.log("resusers", res);
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message&&
+          navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
+
   const handleDelete = async (user) => {
     if (
       window.confirm(

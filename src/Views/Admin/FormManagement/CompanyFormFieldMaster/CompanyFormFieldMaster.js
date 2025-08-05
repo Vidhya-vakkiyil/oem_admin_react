@@ -22,6 +22,7 @@ import Admin from "../../Admin";
 import {
   deleteCompanyFormsFields,
   fetchCompanyFormfields,
+  updateCompanyFormsField
 } from "../../../../store/slices/companyformfieldSlice";
 import EditFormfield from "./EditFormfield";
 const ViewCompanyFormFieldMaster = Loadable(
@@ -39,11 +40,24 @@ const CompanyFormFieldMaster = () => {
   const [ViewId, setViewId] = useState("");
   const [formfieldpageOpen, setformFieldpageopen] = useState(false);
   const [editfield, setEditfield] = useState([]);
-  const [formFieldList, setFormFieldList] = useState([]);
   const [editformfielddetails, seteditformfielddetails] = useState([]);
+  const [editformfieldDialog, seteditformfielddialog] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchCompanyFormfields());
+     const fetchData = async () => {
+          try {
+            const res = await dispatch(fetchCompanyFormfields()).unwrap();
+            console.log("resusers", res);
+            
+            if (res.message === "Please Login!") {
+              navigate("/");
+            }
+          } catch (err) {
+            console.log("Failed to fetch user", err.message);
+            err.message && navigate("/");
+          }
+        };
+        fetchData();
   }, [dispatch]);
   const handleDelete = async (companyformfield) => {
     if (
@@ -63,52 +77,60 @@ const CompanyFormFieldMaster = () => {
       }
     }
   };
-  const handleEditCompanyFormfield = (data) => {
-    console.log("handleEditCompanyFormfield", editfield, data, formFieldList);
-    const updateddata = {
-      Form: editfield.Form,
-      FormSection: editfield.FormSection,
-      bind_data_by: data.bind_data_by,
-      display_name: data.display_name,
-      field_name: data.field_name,
-      field_order: data.field_order,
-      input_type: data.input_type,
-      is_field_data_bind: data.is_field_data_bind,
-      is_visible: data.is_visible,
-      status: data.status,
-    };
-    const updatedList = formFieldList.map((field) =>
-      field.id === editfield.id ? { ...field, ...updateddata } : field
-    );
-    console.log("updatedList", updatedList);
+  const handleEditCompanyFormfield = async (data) => {
+    console.log("handleEditCompanyFormfield", editfield, data);
+    var id = editfield.id;
+    try {
+      const payload = {
+        companyId: editfield.Company?.id,
+        formId: editfield.Form?.id,
+        formSectionId: data.formSectionId,
+        bind_data_by: data.bind_data_by,
+        display_name: data.display_name,
+        field_name: data.field_name,
+        field_order: data.field_order,
+        input_type: data.input_type,
+        is_field_data_bind: data.is_field_data_bind,
+        is_visible: data.is_visible,
+        status: data.status,
+      };
+      console.log("updateddata",payload)
+      const res = await dispatch(
+        updateCompanyFormsField({ id,  data: payload })
+      ).unwrap();
+      if (res.message === "Please Login!") {
+        navigate("/login");
+      } else {
+        navigate("/admin/CompanyFormFields");
+      }
+      navigate("/admin/CompanyFormFields");
+    } catch (error) {
+      console.log("Failed to update user");
+    }
     setformFieldpageopen(false);
-    setFormFieldList(updatedList);
   };
   const handleEdit = (data) => {
-    console.log("handleEditCompanyFormfield", editfield, data, formFieldList);
-    const updateddata = {
-      Form: editfield.Form,
-      FormSection: editfield.FormSection,
-      bind_data_by: data.bind_data_by,
-      display_name: data.display_name,
-      field_name: data.field_name,
-      field_order: data.field_order,
-      input_type: data.input_type,
-      is_field_data_bind: data.is_field_data_bind,
-      is_visible: data.is_visible,
-      status: data.status,
-    };
-    const updatedList = formFieldList.map((field) =>
-      field.id === editfield.id ? { ...field, ...updateddata } : field
-    );
-    console.log("updatedList", updatedList);
+    console.log("handleedit", data);
+    setEditfield(data);
+    seteditformfielddialog(true);
     setformFieldpageopen(true);
-    setFormFieldList(updatedList);
+
+    seteditformfielddetails({
+      formSectionId: data.FormSection?.id,
+      field_name: data.field_name,
+      display_name: data.display_name,
+      input_type: data.input_type,
+      field_order: data.field_order,
+      is_visible: JSON.stringify(data.is_visible),
+      is_field_data_bind: JSON.stringify(data.is_field_data_bind),
+      bind_data_by: data.bind_data_by,
+      status: JSON.stringify(data.status),
+    });
   };
 
-  const handleView = (user) => {
+  const handleView = (data) => {
     //navigate(`/company-forms/${user.id}`);
-    setViewId(user.id);
+    setViewId(data.id);
   };
   const handleFilterpage = (item) => {
     console.log("handleFilterpage", item.id);
@@ -245,7 +267,7 @@ const CompanyFormFieldMaster = () => {
               design="Emphasized"
               onClick={() => navigate("/admin/CompanyFormFields/create")}
             >
-              Add
+              Add Company Form Field
             </Button>
           }
         >
@@ -341,13 +363,18 @@ const CompanyFormFieldMaster = () => {
           />
         </FlexBox>
       </Card>
-      <EditFormfield
-        formfieldpageOpen={formfieldpageOpen}
-        setformFieldpageopen={setformFieldpageopen}
-        onSubmit={handleEditCompanyFormfield}
-        mode="edit"
-        defaultValues={editformfielddetails}
-      />
+      {console.log("editformfielddetails", editformfielddetails)}
+      {formfieldpageOpen ? (
+        <EditFormfield
+          formfieldpageOpen={formfieldpageOpen}
+          setformFieldpageopen={setformFieldpageopen}
+          onSubmit={handleEditCompanyFormfield}
+          mode="edit"
+          defaultValues={editformfielddetails}
+        />
+      ) : (
+        <></>
+      )}
     </Page>
   );
 };

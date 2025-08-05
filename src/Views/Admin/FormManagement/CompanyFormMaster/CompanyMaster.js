@@ -33,7 +33,21 @@ const CompanyMaster = () => {
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchCompanyForms());
+    //dispatch(fetchCompanyForms());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchCompanyForms()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   const handleDelete = async (companyform) => {
     if (
@@ -123,7 +137,7 @@ const CompanyMaster = () => {
                 //onClick={() => { setLayout("TwoColumnsMidExpanded");setViewItem(row.original)}}
                 onClick={() => handleDelete(row.original)}
               />
-            
+
               <Button
                 icon="sap-icon://navigation-right-arrow"
                 disabled={isOverlay}

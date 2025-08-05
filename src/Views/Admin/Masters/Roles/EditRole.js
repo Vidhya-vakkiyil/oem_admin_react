@@ -14,8 +14,22 @@ const EditRole = () => {
     const { currentRole, loading: roleLoading } = useSelector(state => state.roles);
 
     useEffect(() => {
-        dispatch(fetchPermissions());
-        dispatch(fetchRoleById(id));
+        //dispatch(fetchPermissions());
+        //dispatch(fetchRoleById(id));
+ const fetchData = async () => {
+          try {
+            const res = await dispatch(fetchPermissions()).unwrap();
+            console.log("resusers", res);
+            dispatch(fetchRoleById(id));
+            if (res.message === "Please Login!") {
+              navigate("/");
+            }
+          } catch (err) {
+            console.log("Failed to fetch user", err.message);
+            err.message && navigate("/");
+          }
+        };
+        fetchData();
     }, [dispatch, id]);
 
   const handleUpdate = async (data) => {
@@ -52,6 +66,7 @@ const EditRole = () => {
             }}
             permissions={permissions} 
             apiError={apiError} 
+            mode="edit"
         />;
 };
 

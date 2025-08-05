@@ -10,19 +10,21 @@ import companyformReducer from './slices/CompanyFormSlice';
 import formfieldReducer from './slices/FormFieldSlice';
 import formsectionReducer from './slices/formsectionSlice'
 import companyformfieldReducer from './slices/companyformfieldSlice'
+import usermenusReducer from './slices/usermenusSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
     users: usersReducer,
     roles: roleReducer,
     permissions: permissionReducer,
-    companies: companyReducer,
+    companies: companyReducer, 
     branches: branchReducer,
     forms:formReducer,
     companyforms:companyformReducer,
     formField:formfieldReducer,
     formsection:formsectionReducer,
     companyformfield:companyformfieldReducer,
+    usermenus:usermenusReducer,
   },
 });
 

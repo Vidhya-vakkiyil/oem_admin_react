@@ -18,24 +18,42 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { useNavigate } from "react-router-dom";
-import { deleteForm, fetchForm } from "../../../../store/slices/formmasterSlice";
+import {
+  deleteForm,
+  fetchForm,
+} from "../../../../store/slices/formmasterSlice";
+import { deleteUserMenus, fetchUserMenus } from "../../../../store/slices/usermenusSlice";
 const ViewMenuMaster = Loadable(lazy(() => import("./ViewMenuMaster")));
 
 const MenuMaster = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { forms, loading } = useSelector((state) => state.forms);
+  const { usermenus, loading } = useSelector((state) => state.usermenus);
   const [search, setSearch] = useState("");
   const [layout, setLayout] = useState("OneColumn");
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchForm());
+    //dispatch(fetchForm());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchUserMenus()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   const handleDelete = async (menu) => {
     if (window.confirm(`Are you sure to delete menu: ${menu.name}?`)) {
       try {
-        const res = await dispatch(deleteForm(menu.id)).unwrap();
+        const res = await dispatch(deleteUserMenus(menu.id)).unwrap();
         if (res.message === "Please Login!") {
           navigate("/login");
         }
@@ -56,11 +74,13 @@ const MenuMaster = () => {
   };
 
   const filteredRows =
-    forms &&
-    forms?.filter(
+    usermenus &&
+    usermenus?.filter(
       (menu) =>
         menu.name.toLowerCase().includes(search.toLowerCase()) ||
-        menu.display_name.toLowerCase().includes(search.toLowerCase())
+        menu.display_name.toLowerCase().includes(search.toLowerCase()) ||
+        menu.parent.toLowerCase().includes(search.toLowerCase()) ||
+        menu.orderno.toString().includes(search) 
     );
 
   const columns = useMemo(
@@ -72,28 +92,29 @@ const MenuMaster = () => {
       {
         Header: "Display Name",
         accessor: "display_name",
-      }, 
+      },
       {
         Header: "Parent",
         accessor: "parent",
+        Cell: ({ row }) => {
+          const parent = usermenus.find((item) => item.id === row.original.parent);          
+          return parent ? parent.display_name : "";
+        },  
       },
-       {
+      {
         Header: "Order No",
-        accessor: "orderno",
+        accessor: "order_number",
       },
       {
         Header: "Form",
         accessor: "form",
       },
-      {
-        Header: "Deletable",
-        accessor: "deetable",
-      },
+     
       {
         Header: "Status",
         accessor: "status",
         Cell: ({ row }) =>
-          row.original.status === 1 ? (
+          row.original.status === 1|| row.original.status === "1" ? (
             <Tag children="Active" design="Positive" size="S" />
           ) : (
             <Tag children="Inactive" design="Negative" size="S" />
@@ -142,7 +163,7 @@ const MenuMaster = () => {
         },
       },
     ],
-    []
+    [usermenus]
   );
   return (
     <Page
@@ -268,5 +289,4 @@ const MenuMaster = () => {
   );
 };
 
-
-export default MenuMaster
+export default MenuMaster;

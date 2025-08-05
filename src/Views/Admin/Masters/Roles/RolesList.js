@@ -31,7 +31,21 @@ const RolesList = () => {
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchRoles());
+    //dispatch(fetchRoles());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchRoles()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   const handleDelete = async (role) => {
     if (
@@ -71,13 +85,12 @@ const RolesList = () => {
         Header: "Role Name",
         accessor: "name",
         width: 220,
-
       },
       {
         Header: "Permissions",
         accessor: "Permissions",
         width: 430,
-        height:400,
+        height: 400,
         Cell: ({ row }) =>
           row.original.Permissions ? (
             <FlexBox
@@ -101,7 +114,6 @@ const RolesList = () => {
         accessor: "status",
         width: 220,
 
-
         Cell: ({ row }) =>
           row.original.status === 1 ? (
             <Tag children="Active" design="Positive" size="S" />
@@ -118,7 +130,6 @@ const RolesList = () => {
         disableSortBy: true,
         id: "actions",
         width: 220,
-
 
         Cell: (instance) => {
           const { cell, row, webComponentsReactProperties } = instance;

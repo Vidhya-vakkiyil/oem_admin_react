@@ -18,22 +18,38 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Admin from "../../Admin";
-import { deleteFormFields, fetchFormFields } from "../../../../store/slices/FormFieldSlice";
+import {
+  deleteFormFields,
+  fetchFormFields,
+} from "../../../../store/slices/FormFieldSlice";
 const ViewFormFields = Loadable(lazy(() => import("./ViewFormFields")));
 
 const FormFields = () => {
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const { formField } = useSelector((state) => state.formField);
 
+  const { formField } = useSelector((state) => state.formField);
 
   const [search, setSearch] = useState("");
   const [layout, setLayout] = useState("OneColumn");
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    dispatch(fetchFormFields());
+    //dispatch(fetchFormFields());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchFormFields()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   const handleDelete = async (user) => {
     if (
@@ -62,13 +78,14 @@ const dispatch = useDispatch();
   };
   const filteredRows = formField?.filter(
     (field) =>
-      field.field_name.toLowerCase().includes(search.toLowerCase())||
+      field.field_name.toLowerCase().includes(search.toLowerCase()) ||
       field.Form?.name.toLowerCase().includes(search.toLowerCase()) ||
-      field.FormSection?.section_name.toLowerCase().includes(search.toLowerCase()) ||
-      
-      field.display_position.toLowerCase().includes(search.toLowerCase())||
-      field.input_type.toLowerCase().includes(search.toLowerCase())||
-      field.field_order.toLowerCase().includes(search.toLowerCase())||
+      field.FormSection?.section_name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      field.display_position.toLowerCase().includes(search.toLowerCase()) ||
+      field.input_type.toLowerCase().includes(search.toLowerCase()) ||
+      field.field_order.toLowerCase().includes(search.toLowerCase()) ||
       field.is_visible.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -91,7 +108,7 @@ const dispatch = useDispatch();
       {
         Header: "Field Display Name",
         accessor: "display_name",
-        width:180,
+        width: 180,
       },
       {
         Header: "Field Type",
@@ -271,7 +288,7 @@ const dispatch = useDispatch();
                     verticalAlign: "middle",
                   }}
                 >
-                  {ViewId&&<ViewFormFields id={ViewId} /> }
+                  {ViewId && <ViewFormFields id={ViewId} />}
                 </div>
               </Page>
             }

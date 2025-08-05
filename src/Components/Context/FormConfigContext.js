@@ -2,8 +2,93 @@ import React, { createContext } from "react";
 
 export const FormConfigContext = createContext();
 const FormConfigProvider = ({ children }) => {
-  const ManageSalesOderHeaderField=[
-     {
+  const Menuitems = [
+    {
+      id: 1,
+      MenuName: "Dashboard",
+      DisplayName: "Dashboard",
+      Parent: "0",
+      orderNo: 1,
+      icon: "bbyd-dashboard",
+      route: "/",
+    },
+    {
+      id: 2,
+      MenuName: "Sales",
+      DisplayName: "Sales",
+      Parent: "0",
+      orderNo: 1,
+      icon: "master-task-triangle",
+      children: [
+        {
+          id: 21,
+          MenuName: "companies",
+          DisplayName: "Companies",
+          Parent: "0",
+          orderNo: 2,
+          icon: "kpi-corporate-performance",
+          route: "/admin/companies",
+        },
+        {
+          id: 22,
+          MenuName: "branches",
+          DisplayName: "Branches",
+          Parent: "0",
+          orderNo: 1,
+          icon: "background",
+          route: "/admin/branches",
+        },
+        {
+          id: 23,
+          DisplayName: "Roles",
+          orderNo: 3,
+          Parent: "0",
+          MenuName: "roles",
+          icon: "end-user-experience-monitoring",
+          route: "/admin/roles",
+        },
+        {
+          id: 24,
+          DisplayName: "Users",
+          Parent: "0",
+          orderNo: 4,
+          MenuName: "users",
+          icon: "user-edit",
+          route: "/admin/users",
+        },
+      ],
+    },
+    {
+      id: 3,
+      MenuName: "Purchase",
+      DisplayName: "Purchase",
+      Parent: "0",
+      icon: "menu",
+      children: [
+        {
+          id: 21,
+          DisplayName: "Menu master",
+          orderNo: 1,
+          Parent: "0",
+          MenuName: "menumaster",
+          icon: "menu2",
+          route: "/admin/MenuMaster",
+        },
+        {
+          id: 22,
+          DisplayName: "User Role Menus",
+          orderNo: 1,
+          Parent: "0",
+          MenuName: "userrolemenus",
+          icon: "role",
+          route: "/admin/UserRoleMenus",
+        },
+      ],
+    },
+  ];
+
+  const ManageSalesOderHeaderField = [
+    {
       FieldName: "Search",
       DisplayName: "Search",
       DataType: "nvarchar(50)",
@@ -22,7 +107,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "CustomerCode",
       DisplayName: "Customer Code",
       DataType: "nvarchar(50)",
@@ -31,7 +117,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "CustomerName",
       DisplayName: "Customer Name",
       DataType: "nvarchar(50)",
@@ -40,7 +127,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "CustomerRefno",
       DisplayName: "Customer Ref. No",
       DataType: "nvarchar(50)",
@@ -49,7 +137,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "PostingDate",
       DisplayName: "Posting Date",
       DataType: "nvarchar(50)",
@@ -58,7 +147,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "DeliveryDate",
       DisplayName: "Delivery Date",
       DataType: "nvarchar(50)",
@@ -67,7 +157,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "Status",
       DisplayName: "Status",
       DataType: "nvarchar(50)",
@@ -106,11 +197,15 @@ const FormConfigProvider = ({ children }) => {
     { Header: "Posting Date", accessor: "PostingDate", type: "text" },
     { Header: "Delivery Date", accessor: "DeliveryDate", type: "text" },
     { Header: "Status", accessor: "Status", type: "text" },
-    { Header: "Sales Employee Name", accessor: "SalesEmployeeName", type: "text" },
+    {
+      Header: "Sales Employee Name",
+      accessor: "SalesEmployeeName",
+      type: "text",
+    },
     { Header: "User Signature", accessor: "UserSignature", type: "text" },
-    ];
-    const ManageSalesOrderTableData =[
-      {
+  ];
+  const ManageSalesOrderTableData = [
+    {
       DocumentNo: "1315",
       CustomerCode: "1001",
       CustomerName: "c003",
@@ -119,9 +214,9 @@ const FormConfigProvider = ({ children }) => {
       DeliveryDate: "15.02.2025",
       Status: "GBP",
       SalesEmployeeName: "GBPName1",
-      UserSignature: ""
+      UserSignature: "",
     },
-     {
+    {
       DocumentNo: "1313",
       CustomerCode: "1005",
       CustomerName: "c006",
@@ -130,8 +225,9 @@ const FormConfigProvider = ({ children }) => {
       DeliveryDate: "11.02.2025",
       Status: "GBP",
       SalesEmployeeName: "GBPName2",
-      UserSignature: ""
-    }, {
+      UserSignature: "",
+    },
+    {
       DocumentNo: "1215",
       CustomerCode: "1021",
       CustomerName: "c002",
@@ -140,9 +236,9 @@ const FormConfigProvider = ({ children }) => {
       DeliveryDate: "25.02.2025",
       Status: "GBP",
       SalesEmployeeName: "GBPName3",
-      UserSignature: ""
+      UserSignature: "",
     },
-    ];
+  ];
   const customerpopuptableColumns = [
     { Header: "BP Code", accessor: "BPCode", type: "text" },
     { Header: "BP Name", accessor: "BPName", type: "text" },
@@ -373,15 +469,57 @@ const FormConfigProvider = ({ children }) => {
     { Header: "Item group", accessor: "itemgroup", type: "text" },
   ];
   const itemData = [
-    { SLNo:"1",itemCode: "113", itemName: "ITEM_113", quantity: "1", price: "1300" },
-    { SLNo:"2",itemCode: "114", itemName: "ITEM_114", quantity: "3", price: "1100" },
-    { SLNo:"3",itemCode: "115", itemName: "ITEM_115", quantity: "2", price: "1600" },
-    { SLNo:"4",itemCode: "116", itemName: "ITEM_116", quantity: "4", price: "2000" },
+    {
+      SLNo: "1",
+      itemCode: "113",
+      itemName: "ITEM_113",
+      quantity: "1",
+      price: "1300",
+    },
+    {
+      SLNo: "2",
+      itemCode: "114",
+      itemName: "ITEM_114",
+      quantity: "3",
+      price: "1100",
+    },
+    {
+      SLNo: "3",
+      itemCode: "115",
+      itemName: "ITEM_115",
+      quantity: "2",
+      price: "1600",
+    },
+    {
+      SLNo: "4",
+      itemCode: "116",
+      itemName: "ITEM_116",
+      quantity: "4",
+      price: "2000",
+    },
   ];
   const itempopupData = [
-    { SLNo:"5",itemCode: "117", itemName: "ITEM_117", quantity: "1", price: "1300" },
-    { SLNo:"6",itemCode: "118", itemName: "ITEM_118", quantity: "3", price: "1100" },
-    { SLNo:"7",itemCode: "119", itemName: "ITEM_119", quantity: "2", price: "1600" },
+    {
+      SLNo: "5",
+      itemCode: "117",
+      itemName: "ITEM_117",
+      quantity: "1",
+      price: "1300",
+    },
+    {
+      SLNo: "6",
+      itemCode: "118",
+      itemName: "ITEM_118",
+      quantity: "3",
+      price: "1100",
+    },
+    {
+      SLNo: "7",
+      itemCode: "119",
+      itemName: "ITEM_119",
+      quantity: "2",
+      price: "1600",
+    },
   ];
   const servicepopupData = [
     {
@@ -594,7 +732,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "PaymentMethod",
       DisplayName: "Payment Method",
       DataType: "nvarchar(50)",
@@ -603,7 +742,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "BPProject",
       DisplayName: "BP Project",
       DataType: "nvarchar(50)",
@@ -612,7 +752,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "CancellationDate",
       DisplayName: "Cancellation Date",
       DataType: "nvarchar(50)",
@@ -621,7 +762,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "RequiedDate",
       DisplayName: "Required Date",
       DataType: "nvarchar(50)",
@@ -630,7 +772,8 @@ const FormConfigProvider = ({ children }) => {
       DisplayType: "Left",
       order: "1",
       Visible: "1",
-    },{
+    },
+    {
       FieldName: "FederalTaxId",
       DisplayName: "Federal Tax Id",
       DataType: "nvarchar(50)",
@@ -640,7 +783,89 @@ const FormConfigProvider = ({ children }) => {
       order: "1",
       Visible: "1",
     },
-  ];  
+  ];
+  const userDefinedDetails = [
+    {
+      field_name: "loadType",
+      display_name: "Load Type",
+      DataType: "nvarchar(50)",
+      input_type: "text",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+    {
+      field_name: "incubeRef",
+      display_name: "Incube Ref",
+      DataType: "nvarchar(50)",
+      input_type: "Select",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+    {
+      field_name: "vehicleCode",
+      display_name: "Vehicle Code",
+      DataType: "nvarchar(50)",
+      input_type: "text",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+    {
+      field_name: "lcContract",
+      display_name: "LC Contract",
+      DataType: "nvarchar(50)",
+      input_type: "Select",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+    {
+      field_name: "incentivedoc",
+      display_name: "Incentive Document",
+      DataType: "nvarchar(50)",
+      input_type: "selectdropdown",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+    {
+      field_name: "bankName",
+      display_name: "Bank Name",
+      DataType: "nvarchar(50)",
+      input_type: "text",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+    {
+      field_name: "accountNo",
+      display_name: "Account No",
+      DataType: "nvarchar(50)",
+      input_type: "text",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+    {
+      field_name: "ibanNo",
+      display_name: "IBAN No",
+      DataType: "nvarchar(50)",
+      input_type: "text",
+      Position: "Header",
+      DisplayType: "Left",
+      order: "1",
+      Visible: "1",
+    },
+  ];
   const CustomerDetails = [
     {
       field_name: "Customer",
@@ -761,11 +986,13 @@ const FormConfigProvider = ({ children }) => {
   return (
     <FormConfigContext.Provider
       value={{
+        Menuitems,
         ManageSalesOderHeaderField,
         ManageSalesOrderTableColumn,
         ManageSalesOrderTableData,
         fieldConfig,
         Accountingdetails,
+        userDefinedDetails,
         CustomerDetails,
         DocumentDetails,
         itemTableColumn,

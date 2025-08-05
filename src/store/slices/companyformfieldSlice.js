@@ -20,7 +20,8 @@ export const createCompanyFormsFields = createAsyncThunk('companyformfield/creat
   return response.data;
 });
 
-export const updateCompanyFormsFields = createAsyncThunk('companyformfield/updateCompanyFormsFields', async ({ id, data }) => {
+export const updateCompanyFormsField = createAsyncThunk('companyformfield/updateCompanyFormsField', async ({ id, data }) => {
+  console.log("object", id, data);
   const response = await api.put(`${API_URL}/${id}`, data, {withCredentials: true});
   return response.data;
 });
@@ -56,7 +57,8 @@ const companyformfieldSlice = createSlice({
       .addCase(createCompanyFormsFields.fulfilled, (state, action) => {
         state.companyformfield.push(action.payload);
       })
-      .addCase(updateCompanyFormsFields.fulfilled, (state, action) => {
+      .addCase(updateCompanyFormsField.fulfilled, (state, action) => {
+        console.log("updatecompanyformfieldSlice", action.payload,action);
         const index = state.companyformfield.findIndex((u) => u.id === action.payload.id);
         if (index !== -1) state.companyformfield[index] = action.payload;
       })

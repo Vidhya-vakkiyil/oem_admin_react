@@ -41,11 +41,11 @@ import { SalesOrderRenderInput } from "./SalesOrderRenderInput";
 import General from "./General/General";
 import Contents from "./Contents/Contents";
 import Logistics from "./Logistics/Logistics";
-import UserdefinedFields from "./UserdefinedFields";
 import { useNavigate } from "react-router-dom";
 import CustomerSelection from "./Header/CustomerSelection";
 import Accounting from "./Accounting/Accounting";
 import Attachments from "./Attachments/Attachments";
+import UserDefinedFields from "./User-DefinedFields/UserDefinedFields";
 
 export default function SalesOrder() {
   const { fieldConfig, CustomerDetails, DocumentDetails } =
@@ -60,6 +60,7 @@ export default function SalesOrder() {
     Remarks: "",
     DocTotal: 0,
     items: [{ ItemCode: "", ItemName: "", Quantity: 0, Price: 0 }],
+    cusDetail:[],
     U_Test1: "",
     U_Test2: "",
   });
@@ -69,13 +70,23 @@ export default function SalesOrder() {
     menuRef.current.open = true;
     menuRef.current.opener = e.currentTarget;
   };
-  const handleChange = (e, name) => {
-    const value = e.target.value;
+  const handleChange = (e, name,formName) => {
+    const newValue = e.target.value;
+    if(formName === "cusDetail" || formName === "docDetail") {
+      
+      setForm((prevForm) => ({
+        ...prevForm,
+        formName:[{[name]: newValue}],
+      }));
+      return;
+    } else{
+  setForm({ ...form, [name]: newValue });
+    }
 
     // If the field is part of the "additional" section
 
     // Top-level fields
-    setForm({ ...form, [name]: value });
+    
   };
 
   const handleRowChange = (i, name, key, value) => {
@@ -254,7 +265,7 @@ export default function SalesOrder() {
         style={{ height: "100%" }}
         titleText="General"
       >
-        <General form={form} handleChange={handleChange} />
+        <General form={form}  handleChange={handleChange} />
       </ObjectPageSection>
 
       <ObjectPageSection
@@ -312,7 +323,8 @@ export default function SalesOrder() {
         }}
         titleText="User-defined Fields"
       >
-        <UserdefinedFields />
+        <UserDefinedFields form={form}
+          handleChange={handleChange}/>
       </ObjectPageSection>
     </ObjectPage>
   );

@@ -17,7 +17,7 @@ import {
 } from "@ui5/webcomponents-base/dist/config/Theme";
 import SalesOrder from "./Views/SalesOrder/SalesOrder";
 import FormConfigProvider from "./Components/Context/FormConfigContext";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import ManageSalesOrder from "./Views/ManageSalesOrder/ManageSalesOrder";
 // Example: Import CSS for sap_horizon_dark and others you want to support
 import "@ui5/webcomponents/dist/Assets.js";
@@ -38,7 +38,7 @@ import EditUser from "./Views/Admin/Masters/Users/EditUser";
 import RolesList from "./Views/Admin/Masters/Roles/RolesList";
 import FormFields from "./Views/Admin/FormManagement/FormFieldMaster/FormFields";
 import FormMaster from "./Views/Admin/FormManagement/FormMaster/FormMaster";
-import CreateForm from "./Views/Admin/FormManagement/FormFieldMaster/CreateFormField";
+import CreateForm from "./Views/Admin/FormManagement/FormMaster/CreateForm";
 import CreateFormField from "./Views/Admin/FormManagement/FormFieldMaster/CreateFormField";
 import CreateRole from "./Views/Admin/Masters/Roles/CreateRole";
 import UserDashboard from "./Views/Dashboard/UserDashboard";
@@ -49,7 +49,6 @@ import CreateCompany from "./Views/Admin/Masters/Companies/CreateCompany";
 import CreateBranch from "./Views/Admin/Masters/Branches/CreateBranch";
 import Menu from "./Views/Admin/Menu/Menu";
 import MenuMaster from "./Views/Admin/Menu/MenuMaster/MenuMaster";
-import UserRoleMenus from "./Views/Admin/Menu/UserRoleMenus/UserRoleMenus";
 import CreateMenu from "./Views/Admin/Menu/MenuMaster/CreateMenu";
 import EditFormMaster from "./Views/Admin/FormManagement/FormMaster/EditFormMaster";
 import EditCompanyForm from "./Views/Admin/FormManagement/CompanyFormMaster/EditCompanyForm";
@@ -63,12 +62,17 @@ import CompanyFormFieldMaster from "./Views/Admin/FormManagement/CompanyFormFiel
 import CreateCompanyFormField from "./Views/Admin/FormManagement/CompanyFormFieldMaster/CreateCompanyFormField";
 import AddFormField from "./Views/Admin/FormManagement/CompanyFormFieldMaster/AddFormField";
 import FilterCompanyFormField from "./Views/Admin/FormManagement/CompanyFormFieldMaster/EditCompanyFormField";
-
+import EditUserMenu from "./Views/Admin/Menu/MenuMaster/EditUserMenu";
+import UserRoleMenuMaster from "./Views/Admin/Menu/UserRoleMenus/UserRoleMenuMaster";
+import CreateUserRoleMenu from "./Views/Admin/Menu/UserRoleMenus/CreateUserRoleMenu";
 
 // const AuthLogin = Loadable(lazy(() => import('Views/pages/auth-forms/AuthLogin')));
 
 function App() {
   const [fioriTheme, setFioriTheme] = useState("sap_fiori_3");
+   const location = useLocation();
+  const hideHeaderRoutes = ["/", "/Login", "/forgot-password"];
+  const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
   useEffect(() => {
     setTheme(fioriTheme);
     document.body.style.setProperty(
@@ -80,11 +84,12 @@ function App() {
     <Provider store={store}>
       <ThemeProvider>
         <div className="App">
-          <Header />
+          {!shouldHideHeader && <Header />}
           <main className="sapTntToolPageMain">
             <div className="sapTntToolPageMainContent">
               <FormConfigProvider>
                 <Routes>
+                  
                   <Route
                     path="/"
                     element={
@@ -101,7 +106,10 @@ function App() {
                       </PublicRoute>
                     }
                   />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/forgot-password" element={ <PublicRoute>
+                        <ForgotPassword />
+                      </PublicRoute>} />
+                  {/* <Route path="/register" element={<Register />} /> */}
 
                   <Route path="/UserDashboard" element={<UserDashboard />} />
 
@@ -120,23 +128,38 @@ function App() {
 
                     <Route path="roles" element={<RolesList />} />
                     <Route path="roles/create" element={<CreateRole />} />
-                    <Route path="roles/edit/:id" element={<EditRole/>}/>
+                    <Route path="roles/edit/:id" element={<EditRole />} />
 
                     <Route path="companies" element={<Companies />} />
                     <Route
                       path="companies/create"
                       element={<CreateCompany />}
                     />
-                    <Route path="companies/edit/:id" element={<EditCompany/>}/>
+                    <Route
+                      path="companies/edit/:id"
+                      element={<EditCompany />}
+                    />
 
                     <Route path="branches" element={<Branches />} />
                     <Route path="branches/create" element={<CreateBranch />} />
-                    <Route path="branches/edit/:id" element={<EditBranches/>}/>
+                    <Route
+                      path="branches/edit/:id"
+                      element={<EditBranches />}
+                    />
 
                     <Route path="menu" element={<Menu />} />
                     <Route path="MenuMaster" element={<MenuMaster />} />
-                    <Route path="UserRoleMenus" element={<UserRoleMenus />} />
-                    <Route path="MenuMaster/create" element={<CreateMenu/>}/>
+                    <Route path="UserRoleMenus" element={<UserRoleMenuMaster />} />
+                    <Route
+                      path="UserRoleMenus/create"
+                      element={<CreateUserRoleMenu />}
+                    />
+
+                    <Route path="MenuMaster/create" element={<CreateMenu />} />
+                    <Route
+                      path="MenuMaster/edit/:id"
+                      element={<EditUserMenu />}
+                    />
 
                     <Route path="sales-orders" element={<SalesOrders />} />
                     <Route path="sales-invoices" element={<SalesInvoices />} />
@@ -147,7 +170,10 @@ function App() {
                     />
                     <Route path="FormMaster" element={<FormMaster />} />
                     <Route path="FormMaster/create" element={<CreateForm />} />
-                    <Route path="FormMaster/edit/:id" element={<EditFormMaster/>}/>
+                    <Route
+                      path="FormMaster/edit/:id"
+                      element={<EditFormMaster />}
+                    />
 
                     <Route path="company-forms" element={<CompanyMaster />} />
                     <Route
@@ -164,12 +190,27 @@ function App() {
                       path="FormFields/create"
                       element={<CreateFormField />}
                     />
-                    <Route path="FormFields/edit/:id" element={<EditFormField/>}/>
+                    <Route
+                      path="FormFields/edit/:id"
+                      element={<EditFormField />}
+                    />
 
-                    <Route path = "CompanyFormFields" element={<CompanyFormFieldMaster/>}/>
-                    <Route path="CompanyFormFields/create" element={<CreateCompanyFormField/>}/>
-                    <Route path="CompanyFormFields/filter/:id" element={<FilterCompanyFormField/>}/>
-                    <Route path="CompanyFormFields/create/addFormField" element={<AddFormField/>}/>
+                    <Route
+                      path="CompanyFormFields"
+                      element={<CompanyFormFieldMaster />}
+                    />
+                    <Route
+                      path="CompanyFormFields/create"
+                      element={<CreateCompanyFormField />}
+                    />
+                    <Route
+                      path="CompanyFormFields/filter/:id"
+                      element={<FilterCompanyFormField />}
+                    />
+                    <Route
+                      path="CompanyFormFields/create/addFormField"
+                      element={<AddFormField />}
+                    />
 
                     {/* Add other nested routes similarly */}
                   </Route>

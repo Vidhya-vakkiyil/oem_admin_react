@@ -10,23 +10,60 @@ import { FormConfigContext } from "../../../Components/Context/FormConfigContext
 import { SalesOrderRenderInput } from "../SalesOrderRenderInput";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCompanyFormfields } from "../../../store/slices/companyformfieldSlice";
+import { useNavigate } from "react-router-dom";
 const General = (props) => {
-  const { form, handleChange } = props;
-  const { fieldConfig, 
-    //CustomerDetails, 
-    DocumentDetails } =
-    useContext(FormConfigContext);
+  const { form } = props;
+  const {
+    fieldConfig,
+    //CustomerDetails,
+    //DocumentDetails
+  } = useContext(FormConfigContext);
   const [inputvalue, setInputValue] = useState([]);
-    const dispatch = useDispatch();
-   {console.log("DocumentDetails",DocumentDetails)}
-const { companyformfield } = useSelector((state) => state.companyformfield);
+  const [formData, setFormData] = useState({});
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedKey, setSelectedKey] = useState("");
+
+
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { companyformfield } = useSelector((state) => state.companyformfield);
   const CustomerDetails = companyformfield.filter(
     (c) => c.Form?.name === "CusDetail"
   );
+  const DocumentDetails = companyformfield.filter(
+    (c) => c.Form?.name === "DocDetail"
+  );
 
   useEffect(() => {
-    dispatch(fetchCompanyFormfields());
+    //dispatch(fetchCompanyFormfields());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchCompanyFormfields()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
+  const handleChange = (e, formName) => {
+    console.log("handlechangevalue", formName);
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  useEffect(() => {
+    //setInputValue((prev) => ({  ...prev, ...formData }));
+    console.log("formDataGeneral", formData);
+  }, [formData]);
   return (
     <div>
       <FlexBox wrap="Wrap" direction="Row" style={{ gap: "2rem" }}>
@@ -37,24 +74,29 @@ const { companyformfield } = useSelector((state) => state.companyformfield);
             <FormGroup>
               <FlexBox style={{ display: "flex", gap: "2rem" }}>
                 {/* Left Column */}
-                <div style={{ flex: 1 }}>{console.log("cusdetails",CustomerDetails)}
-                  {
-                  CustomerDetails.map((field) => (
-                    <FormItem
-                    tabIndex={field.field_order}
-                      key={field.field_name}
-                      label={field.display_name}
-                      labelContent={<Label>{field.display_name}</Label>}
-                    >
-                      {SalesOrderRenderInput(
-                        field,
-                        form,
-                        handleChange,
-                        inputvalue,
-                        setInputValue
-                      )}
-                    </FormItem>
-                  ))}
+                <div style={{ flex: 1 }}>
+                  {console.log("cusdetails", CustomerDetails)}
+                  {[...CustomerDetails]
+                    .filter((field) => field.is_visible) // ✅ Only visible fields
+                    .sort((a, b) => a.field_order - b.field_order) // ✅ Sort by field_order
+                    .map((field) => (
+                      <FormItem
+                        tabIndex={field.field_order}
+                        key={field.field_name}
+                        label={field.display_name}
+                        labelContent={<Label>{field.display_name}</Label>}
+                      >
+                        {SalesOrderRenderInput(
+                          "cusDetail",
+                          field,
+                          form,
+                          handleChange,
+                          inputvalue,
+                          setInputValue,dialogOpen, setDialogOpen,
+                          selectedKey, setSelectedKey
+                        )}
+                      </FormItem>
+                    ))}
                 </div>
 
                 {/* Right Column */}
@@ -102,22 +144,29 @@ const { companyformfield } = useSelector((state) => state.companyformfield);
                   </div> */}
 
                 {/* Right Column */}
-                <div style={{ flex: 1 }}>{console.log("DocumentDetailsrender",DocumentDetails)}
-                  {DocumentDetails.length>0&&DocumentDetails.map((field) => (
-                    <FormItem
-                    tabIndex={field.field_order}
-                      key={field.field_name}
-                      label={field.display_name}
-                      labelContent={<Label>{field.display_name}</Label>}
-                    >
-                      {SalesOrderRenderInput(  field,
-                        form,
-                        handleChange,
-                        inputvalue,
-                        setInputValue
-                      )}
-                    </FormItem>
-                  ))}
+                <div style={{ flex: 1 }}>
+                  {console.log("DocumentDetailsrender", DocumentDetails)}
+                  {[...DocumentDetails]
+                    .filter((field) => field.is_visible) // ✅ Only visible fields
+                    .sort((a, b) => a.field_order - b.field_order) // ✅ Sort by field_order
+                    .map((field) => (
+                      <FormItem
+                        tabIndex={field.field_order}
+                        key={field.field_name}
+                        label={field.display_name}
+                        labelContent={<Label>{field.display_name}</Label>}
+                      >
+                        {SalesOrderRenderInput(
+                          "docDetail",
+                          field,
+                          form,
+                          handleChange,
+                          inputvalue,
+                          setInputValue,dialogOpen, setDialogOpen,
+                          selectedKey, setSelectedKey
+                        )}
+                      </FormItem>
+                    ))}
                 </div>
               </FlexBox>
             </FormGroup>

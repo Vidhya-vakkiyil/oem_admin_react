@@ -38,13 +38,13 @@ const BranchForm = ({
   companies,
   defaultValues = {
     companyId: "",
-    branch_code:"",
+    branch_code: "",
     name: "",
     city: "",
     address: "",
     status: "",
   },
-  mode="create",
+  mode = "create",
   apiError,
 }) => {
   const {
@@ -61,7 +61,21 @@ const BranchForm = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(fetchRoles());
+    //dispatch(fetchRoles());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchRoles()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
 
   return (
@@ -78,7 +92,7 @@ const BranchForm = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {mode==="edit" ? "Update Branch " : "Create Branch"}
+                  {mode === "edit" ? "Update Branch " : "Create Branch"}
                 </Button>
               </>
             }
@@ -110,14 +124,14 @@ const BranchForm = ({
                   Branch
                 </BreadcrumbsItem>
                 <BreadcrumbsItem data-route="/admin/branches/create">
-                  Create Branch
+                  {mode === "edit" ? "Edit Branch " : "Create Branch"}
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
           }
         >
           <Title level="h4">
-            {mode==="edit" ? "Edit Branch" : "Create New Branch"}
+            {mode === "edit" ? "Edit Branch" : "Create New Branch"}
           </Title>
         </Bar>
       }
@@ -281,7 +295,7 @@ const BranchForm = ({
             />
           </FlexBox>
           <FlexBox direction="Column" style={{ flex: " 28%" }}>
-             <Label>Status</Label>
+            <Label>Status</Label>
             <FormItem label={<Label required>Status</Label>}>
               <Controller
                 name="status"

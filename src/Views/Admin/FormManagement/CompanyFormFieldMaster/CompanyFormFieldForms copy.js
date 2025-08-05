@@ -96,15 +96,27 @@ const CompanyFormFieldForms = ({
   };
 
   useEffect(() => {
-    dispatch(fetchForm());
-    dispatch(fetchFormSection());
-    dispatch(fetchCompanies());
-    dispatch(fetchFormFields());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchFormSection()).unwrap();
+        console.log("resusers", res);
+        dispatch(fetchForm());
+        dispatch(fetchCompanies());
+        dispatch(fetchFormFields());
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   useEffect(() => {
     if (formfieldId) {
       const selectedField = formField.find((f) => f.id === formfieldId);
-      console.log("selectedField",selectedField)
+      console.log("selectedField", selectedField);
       if (selectedField) {
         // Set all relevant fields
         setValue("formId", selectedField.Form?.id || ""); // ✅ Populate formId
@@ -138,7 +150,7 @@ const CompanyFormFieldForms = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {mode==="edit" ? "Update Form Field" : "Create Form Field"}
+                  {mode === "edit" ? "Update Form Field" : "Create Form Field"}
                 </Button>
               </>
             }
@@ -177,7 +189,7 @@ const CompanyFormFieldForms = ({
           }
         >
           <Title level="h4">
-            {mode==="edit" ? "Edit Form Field" : "Create Form Field"}
+            {mode === "edit" ? "Edit Form Field" : "Create Form Field"}
           </Title>
         </Bar>
       }

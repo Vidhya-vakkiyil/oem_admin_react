@@ -53,18 +53,22 @@ const Admin = () => {
     menuRef.current.open = true;
     menuRef.current.opener = e.currentTarget;
   };
+
   return (
-    <FlexBox style={{ height: "80vh" }}>
-      <FlexBox direction="Column">
-        <Bar
-          design="Header"
-          startContent={
-            <Icon name="menu2" onClick={() => setCollapsed(!collapsed)}></Icon>
-          }
-        >
-          {collapsed ? <></> : <Title level="h2">Admin</Title>}
-        </Bar>
-        <FlexBox style={{ paddingTop: "1px", height: "90%" }}>
+    <FlexBox style={{ height: "95vh" }}>
+      <FlexBox style={{ height: "100%" }}>
+        <FlexBox direction="Column" style={{ width:collapsed ? "48px" : "240px", height: "100%" }}>
+          <Bar
+            design="Header"
+            startContent={
+              <Icon
+                name="menu2"
+                onClick={() => setCollapsed(!collapsed)}
+              ></Icon>
+            }
+          >
+            {collapsed ? <></> : <Title level="h2">Admin</Title>}
+          </Bar>
           <SideNavigation
             onSelectionChange={handleNavigationChange}
             collapsed={collapsed}
@@ -106,9 +110,6 @@ const Admin = () => {
                 icon="user-edit"
                 data-key="users"
               />
-              
-              
-              
             </SideNavigationItem>
             <SideNavigationItem
               style={{ textAlign: "start" }}
@@ -183,10 +184,16 @@ const Admin = () => {
         </FlexBox>
       </FlexBox>
       {/* Render routed content */}
-      <div style={{ flex: 1 }}>
+      <flexibleColumnLayout
+        style={{ flex: 1, height: "100%" }}
+        layout="TwoColumnsMidExpanded"
+        onLayoutChange={(e) => {
+          console.log("Layout changed:", e);
+        }}
+      >
         <Outlet />
         {location.pathname === "/admin" && <DashboardPage />}
-      </div>
+      </flexibleColumnLayout>
     </FlexBox>
   );
 };

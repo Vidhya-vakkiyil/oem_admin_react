@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchCompanyFormfields,
-  updateCompanyFormsFields,
+  updateCompanyFormsField,
 } from "../../../../store/slices/companyformfieldSlice";
 import CompanyFormFieldForms from "./CompanyFormFieldForms";
 
@@ -68,15 +68,15 @@ const EditCompanyFormField = () => {
           status: field?.status,
         };
         console.log("payload", payload);
-        const res = await dispatch(
-          updateCompanyFormsFields({ id, payload })
-        ).unwrap();
-        if (res.message === "Please Login!") {
-          navigate("/login");
-        } else {
-          navigate("/admin/CompanyFormFields");
-        }
-        navigate("/admin/CompanyFormFields");
+        // const res = await dispatch(
+        //   updateCompanyFormsField({ id, payload })
+        // ).unwrap();
+        // if (res.message === "Please Login!") {
+        //   navigate("/login");
+        // } else {
+        //   navigate("/admin/CompanyFormFields");
+        // }
+        // navigate("/admin/CompanyFormFields");
       } catch (error) {
         setApiError("Failed to update user");
       }

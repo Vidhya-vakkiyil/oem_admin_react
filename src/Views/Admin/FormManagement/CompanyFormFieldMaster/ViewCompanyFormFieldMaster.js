@@ -87,7 +87,7 @@ const ViewCompanyFormFieldMaster = (props) => {
           <strong>Input Type:</strong> {selectedCompanyformField.input_type}
         </Text></ListItemStandard>
         <ListItemStandard><Text>
-          <strong>Diplay Position:</strong> {selectedCompanyformField.display_position}
+          <strong>Diplay Position:</strong> {selectedCompanyformField.field_order}
         </Text></ListItemStandard>
         <ListItemStandard><Text>
           <strong>Is Visible:</strong>{" "}

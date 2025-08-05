@@ -16,7 +16,7 @@ const schema = yup.object().shape({
   field_order: yup.string().required("Field Order  is required"),
 });
 const AddFormField = ({
-  onSubmit,
+  onSubmitFormField,
   defaultValues = {
     formSectionId: "",
     field_name: "",
@@ -29,6 +29,7 @@ const AddFormField = ({
     status: "",
   },
   formfieldpageOpen,setformFieldpageopen,
+   
   mode = "create"
 }) => {
   const {
@@ -63,7 +64,21 @@ const AddFormField = ({
   };
   
     useEffect(() => {
-      dispatch(fetchFormSection());
+      //dispatch(fetchFormSection());
+      const fetchData = async () => {
+            try {
+              const res = await dispatch(fetchFormSection()).unwrap();
+              console.log("resusers", res);
+              if (res.message === "Please Login!") {
+                navigate("/");
+              }
+            } catch (err) {
+              console.log("Failed to fetch user", err.message);
+              err.message&&
+                navigate("/");
+            }
+          };
+          fetchData();
     }, [dispatch]);
   return (
 
@@ -76,7 +91,7 @@ const AddFormField = ({
         <FlexBox direction="Row" gap={2}>
           <Button
                   design="Emphasized"
-                  form="form" /* ← link button to that form id */
+                  form="addform" /* ← link button to that form id */
                   type="Submit"
                 >
                   {mode==="edit" ? "Update" : "Create"}
@@ -86,13 +101,13 @@ const AddFormField = ({
     >
       <form
         ref={formRef}
-        id="form"
+        id="addform"
         onSubmit={handleSubmit((formData) => {
           const fullData = {
             ...formData
             
           };
-          onSubmit(fullData); // you already pass it upward
+          onSubmitFormField(fullData); // you already pass it upward
         })}
       >
         {console.log("formsectionselecteddata", defaultValues)}

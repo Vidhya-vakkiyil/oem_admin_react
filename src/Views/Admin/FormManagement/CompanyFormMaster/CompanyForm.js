@@ -34,7 +34,6 @@ const schema = yup.object().shape({
   formId: yup.string().required("formId name is required"),
   form_type: yup.string().required("TypeId name is required"),
   status: yup.string().required("status name is required"),
-
 });
 
 const CompanyForm = ({
@@ -83,9 +82,25 @@ const CompanyForm = ({
   };
 
   useEffect(() => {
-    dispatch(fetchCompanies());
-    dispatch(fetchForm());
-    dispatch(fetchRoles());
+    // dispatch(fetchCompanies());
+    // dispatch(fetchForm());
+    // dispatch(fetchRoles());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchCompanies()).unwrap();
+        dispatch(fetchForm());
+        dispatch(fetchRoles());
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
 
   useEffect(() => {
@@ -110,7 +125,7 @@ const CompanyForm = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {mode==="edit" ? "Update Company" : "Create Company"}
+                  {mode === "edit" ? "Update Company" : "Create Company"}
                 </Button>
               </>
             }
@@ -142,14 +157,15 @@ const CompanyForm = ({
                   Company
                 </BreadcrumbsItem>
                 <BreadcrumbsItem data-route="/admin/company-forms/create">
-                  Create Company
+                             {mode === "edit" ? "Edit Company" : "Create New Company"}
+
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
           }
         >
           <Title level="h4">
-            {mode==="edit" ? "Edit Company" : "Create New Company"}
+            {mode === "edit" ? "Edit Company" : "Create New Company"}
           </Title>
         </Bar>
       }
@@ -172,7 +188,7 @@ const CompanyForm = ({
         onSubmit={handleSubmit((formData) => {
           console.log("formDataonsubmit", formData);
           const fullData = {
-            ...formData
+            ...formData,
           };
           onSubmit(fullData); // you already pass it upward
         })}
@@ -228,7 +244,8 @@ const CompanyForm = ({
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value)}
                     valueState={errors.formId ? "Error" : "None"}
-                  >{console.log("formId",field)}
+                  >
+                    {console.log("formId", field)}
                     <Option>Select</Option>
                     {forms
                       .filter((r) => r.status) /* active roles only    */
@@ -281,39 +298,38 @@ const CompanyForm = ({
                 </span>
               )}
             </FormItem>
-            
           </FlexBox>
           <FlexBox direction="Column" style={{ flex: " 48%" }}>
-              <Label>Status</Label>
-              <FormItem label={<Label required>Status</Label>}>
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      name="status"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      valueState={errors.status ? "Error" : "None"}
-                    >
-                      <Option>Select</Option>
-
-                      <Option value="1">Active</Option>
-                      <Option value="0">Inactive</Option>
-                    </Select>
-                  )}
-                />
-
-                {errors.status && (
-                  <span
-                    slot="valueStateMessage"
-                    style={{ color: "var(--sapNegativeColor)" }}
+            <Label>Status</Label>
+            <FormItem label={<Label required>Status</Label>}>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name="status"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    valueState={errors.status ? "Error" : "None"}
                   >
-                    {errors.status.message}
-                  </span>
+                    <Option>Select</Option>
+
+                    <Option value="1">Active</Option>
+                    <Option value="0">Inactive</Option>
+                  </Select>
                 )}
-              </FormItem>
-            </FlexBox>
+              />
+
+              {errors.status && (
+                <span
+                  slot="valueStateMessage"
+                  style={{ color: "var(--sapNegativeColor)" }}
+                >
+                  {errors.status.message}
+                </span>
+              )}
+            </FormItem>
+          </FlexBox>
         </FlexBox>
       </form>
     </Page>

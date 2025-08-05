@@ -10,7 +10,6 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { fetchRoles } from "../../../../store/slices/roleSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
   AnalyticalTable,
@@ -35,10 +34,14 @@ import {
   Token,
 } from "@ui5/webcomponents-react";
 import { useNavigate } from "react-router-dom";
+import { fetchUserMenus } from "../../../../store/slices/usermenusSlice";
+import { fetchCompanies } from "../../../../store/slices/companiesSlice";
+import { fetchForm } from "../../../../store/slices/formmasterSlice";
+import { fetchCompanyForms } from "../../../../store/slices/CompanyFormSlice";
 
 // Validation schema
 const schema = yup.object().shape({
-  name: yup.string().required("Role name is required"),
+  name: yup.string().required("UserRoleMenu name is required"),
   status: yup.string().required(),
   permissionIds: yup.array().of(yup.string()),
 });
@@ -55,7 +58,13 @@ const getOptionKey = (name) => {
   return null;
 };
 
-const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiError }) => {
+const UserRoleMenuForm = ({
+  onSubmit,
+  defaultValues,
+  permissions,
+  mode = "create",
+  apiError,
+}) => {
   const {
     control,
     handleSubmit,
@@ -64,13 +73,22 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
     formState: { errors },
   } = useForm({
     defaultValues,
-        resolver: yupResolver(schema, { context: { mode } }),
-    
+    resolver: yupResolver(schema, { context: { mode } }),
   });
 
   const permissionIds = watch("permissionIds");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const formRef = useRef(null);
+  const { usermenus, loading } = useSelector((state) => state.usermenus);
+  const { formField } = useSelector((state) => state.formField);
+  const { companies } = useSelector((state) => state.companies);
+
+  const { companyforms } = useSelector((state) => state.companyforms);
+  const { companyformfield } = useSelector((state) => state.companyformfield);
+  const [formlist, setFormlist] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+
 
   const grouped = {};
   permissions.forEach((perm) => {
@@ -86,6 +104,26 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
       .map((key) => options.find((opt) => opt.option === key))
       .filter(Boolean),
   }));
+    useEffect(() => {
+    //dispatch(fetchRoles());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchUserMenus()).unwrap();
+        dispatch(fetchForm());
+        dispatch(fetchCompanyForms());
+        dispatch(fetchCompanies());
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
+  }, [dispatch]);
   // const handleChange = (row) => {
 
   //   const permissionName = row;
@@ -227,6 +265,19 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
     ],
     [permissionIds, permissions]
   );
+
+  const handleselectedCompany = (company) => {
+    console.log("handleselectedCompany", companyforms, company);
+    const companyformList = companyforms.filter(
+      (r) => r.status && company === r.Company.id
+    );
+    const uniqueform = Array.from(
+      new Map(companyformList.map((item) => [item.Form?.id, item])).values()
+    );
+    setFormlist(uniqueform);
+    console.log("uniqueform", companyformList, uniqueform);
+  };
+
   return (
     <Page
       backgroundDesign="Solid"
@@ -241,7 +292,9 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {defaultValues.id ? "Edit Role" : "Create New Role"}
+                  {defaultValues.id
+                    ? "Edit UserRoleMenu"
+                    : "Create New UserRoleMenu"}
                 </Button>
                 {apiError && (
                   <MessageStrip
@@ -279,19 +332,18 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
                 separators="Slash"
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/roles">
-                  Roles
+                <BreadcrumbsItem data-route="/admin/UserRoleMenus">
+                  UserRoleMenus
                 </BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/roles/create">
-                   {mode === "edit" ? "Edit Branch " : "Create Branch"}
-
+                <BreadcrumbsItem data-route="/admin/UserRoleMenus/create">
+                  {mode === "edit" ? "Edit Branch " : "Create Branch"}
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
           }
         >
           <Title level="h4">
-            {defaultValues.id ? "Edit Role" : "Create New Role"}
+            {defaultValues.id ? "Edit UserRoleMenu" : "Create New UserRoleMenu"}
           </Title>
         </Bar>
       }
@@ -317,63 +369,84 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
           onSubmit(fullData); // you already pass it upward
         })}
       >
-        <FlexBox style={{ paddingTop: "2rem" }}>
-          <FlexBox direction="Column" style={{ flex: " 18%" }}>
-            <Label>Role Name</Label>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <FormItem
-                  label={<Label required>Label Text</Label>}
-                  style={{ flex: "48%" }}
-                >
-                  <Input
-                    placeholder="Form Name"
-                    name="name"
-                    value={field.value ?? ""} // controlled value
-                    onInput={(e) => field.onChange(e.target.value)} // update RHF
-                    valueState={errors.name ? "Error" : "None"} // red border on error
-                  >
-                    {errors.name && (
-                      /* UI5 shows this automatically when valueState="Error" */
-                      <span slot="valueStateMessage">
-                        {errors.name.message}
-                      </span>
-                    )}
-                  </Input>
-                </FormItem>
-              )}
-            />
-          </FlexBox>
-
-          <FlexBox direction="Column" style={{ flex: " 18%" }}>
-            <Label>Status</Label>{" "}
-            <FormItem label={<Label required>Status</Label>}>
+        <FlexBox
+          wrap="Wrap" // allow line breaks
+          style={{ gap: "1rem", paddingTop: "4rem" }}
+        >
+          <FlexBox direction="Column" style={{ flex: "28%" }}>
+            <Label>Company</Label>
+            <FormItem label={<Label required>companyId</Label>}>
               <Controller
-                name="status"
+                name="companyId"
                 control={control}
                 render={({ field }) => (
                   <Select
-                    name="status"
+                    name="companyId"
                     value={field.value ?? ""}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    valueState={errors.status ? "Error" : "None"}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      setSelectedCompany(e.target.value);
+                      handleselectedCompany(e.target.value);
+                    }}
+                    valueState={errors.companyId ? "Error" : "None"}
                   >
                     <Option>Select</Option>
-
-                    <Option value="1">Active</Option>
-                    <Option value="0">Inactive</Option>
+                    {companies
+                      .filter((r) => r.status) /* active roles only    */
+                      .map((r) => (
+                        <Option key={r.id} value={r.id}>
+                          {r.name}
+                        </Option>
+                      ))}
                   </Select>
                 )}
               />
 
-              {errors.status && (
+              {errors.companyId && (
                 <span
                   slot="valueStateMessage"
                   style={{ color: "var(--sapNegativeColor)" }}
                 >
-                  {errors.status.message}
+                  {errors.companyId.message}
+                </span>
+              )}
+            </FormItem>
+          </FlexBox>
+
+          <FlexBox direction="Column" style={{ flex: "28%" }}>
+            <Label>Form</Label>
+            <FormItem label={<Label required>formId</Label>}>
+              <Controller
+                name="formId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name="formId"
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      setValue("formId", e.target.value || "");
+                    }}
+                    valueState={errors.formId ? "Error" : "None"}
+                  >
+                    {console.log("field", field)}
+                    <Option>Select</Option>
+                    {console.log("formList", formlist)}
+                    {formlist.map((r) => (
+                      <Option key={r.Form?.id} value={r.Form?.id}>
+                        {r.Form?.name}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+              />
+
+              {errors.formId && (
+                <span
+                  slot="valueStateMessage"
+                  style={{ color: "var(--sapNegativeColor)" }}
+                >
+                  {errors.formId.message}
                 </span>
               )}
             </FormItem>
@@ -383,42 +456,14 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
           <FlexBox direction="Column" style={{ marginTop: "1rem" }}>
             <AnalyticalTable
               columns={columns}
-              data={
-                [
-                  {
-                    Module: "User",
-                    List: "",
-                    View: "",
-                    Create: "",
-                    Edit: "",
-                    Delete: "",
-                  },
-                  {
-                    Module: "Role",
-                    List: "",
-                    View: "",
-                    Create: "",
-                    Edit: "",
-                    Delete: "",
-                  },
-                  {
-                    Module: "Branch",
-                    List: "",
-                    View: "",
-                    Create: "",
-                    Edit: "",
-                    Delete: "",
-                  },
-                  {
-                    Module: "Company",
-                    List: "",
-                    View: "",
-                    Create: "",
-                    Edit: "",
-                    Delete: "",
-                  },
-                ] || []
-              }
+              data={usermenus.map((module) => ({
+                Module: module.name,
+                List: "",
+                View: "",
+                Create: "",
+                Edit: "",
+                Delete: "",
+              }))}
               selectionMode="None"
               visibleRows={8}
               onAutoResize={() => {}}
@@ -438,4 +483,4 @@ const RoleForm = ({ onSubmit, defaultValues, permissions,mode = "create", apiErr
   );
 };
 
-export default RoleForm;
+export default UserRoleMenuForm;

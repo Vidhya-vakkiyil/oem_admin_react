@@ -38,7 +38,7 @@ const Form = ({
   defaultValues = {
     name: "",
     display_name: "",
-    status:""
+    status: "",
   },
   mode = "create",
   apiError,
@@ -71,11 +71,25 @@ const Form = ({
   };
 
   useEffect(() => {
-    dispatch(fetchRoles());
+    //dispatch(fetchRoles());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchRoles()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("editdefaultValues",defaultValues)
+    console.log("editdefaultValues", defaultValues);
     if (mode === "edit") {
       setAssignBranchEnabled(true);
       setSelectedCompany(defaultValues.company || null);
@@ -97,7 +111,7 @@ const Form = ({
                   form="form" /* ← link button to that form id */
                   type="Submit"
                 >
-                  {mode==="edit" ? "Update Form" : "Create Form"}
+                  {mode === "edit" ? "Update Form" : "Create Form"}
                 </Button>
               </>
             }
@@ -129,14 +143,14 @@ const Form = ({
                   Forms
                 </BreadcrumbsItem>
                 <BreadcrumbsItem data-route="/admin/FormMaster/create">
-                  Create Form
+                  {mode === "edit" ? "Update Form" : "Create Form"}
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
           }
         >
           <Title level="h4">
-            {mode==="edit" ? "Edit Form" : "Create New Form"}
+            {mode === "edit" ? "Edit Form" : "Create New Form"}
           </Title>
         </Bar>
       }
@@ -157,7 +171,7 @@ const Form = ({
         id="form"
         onSubmit={handleSubmit((formData) => {
           const fullData = {
-            ...formData
+            ...formData,
           };
           onSubmit(fullData); // you already pass it upward
         })}

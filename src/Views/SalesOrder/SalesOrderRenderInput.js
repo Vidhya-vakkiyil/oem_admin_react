@@ -20,18 +20,21 @@ import RenderCustomerDialog from "./General/CustomerPopup/RenderCustomerDialog";
 import "@ui5/webcomponents-icons/dist/value-help.js";
 
 export const SalesOrderRenderInput = (
+  formName,
   field,
   form,
   handleChange,
   inputvalue,
-  setInputValue
+  setInputValue,
+  dialogOpen,
+  setDialogOpen,
+  selectedKey,
+  setSelectedKey
 ) => {
-  console.log("changeinputselect", form, field);
- // const value = form[field.field_name] || "";
-const [value,setvalue] = useState('')
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [customerdialogOpen, setCustomerDialogOpen] = useState(false);
-
+  const value = form[field.field_name] ? form[field.field_name] : "";
+  {
+    console.log("inputvalue", inputvalue);
+  }
   // Suggestion and dialog items
   const productCollection = [
     { Name: "Person1" },
@@ -48,11 +51,7 @@ const [value,setvalue] = useState('')
 
   // Handle value help button click
   const handleValueHelpRequest = (field_name) => {
-    if (field_name === "Customer") {
-      setCustomerDialogOpen(true);
-    } else {
-      setDialogOpen(true);
-    }
+    setDialogOpen(true);
   };
 
   // Handle popup item click
@@ -62,9 +61,9 @@ const [value,setvalue] = useState('')
     setInputValue(selectedItem);
     setDialogOpen(false);
   };
-  const [selectedKey, setSelectedKey] = useState("");
 
   const handleSelectChange = (e) => {
+    console.log("handleselecchange", e,e.detail.selectedOption.innerText);
     const selectedOption = e.detail.selectedOption;
     setSelectedKey(selectedOption.innerText); // or use selectedOption.getAttribute("data-key")
   };
@@ -74,12 +73,9 @@ const [value,setvalue] = useState('')
       return (
         <>
           <Input
-            value={
-              //(inputvalue &&inputvalue.length>0&& inputvalue.map((val) => val[field.field_name])) ||
-             value
-            }
+            value={value}
             name={field.field_name}
-            onInput={(e) => handleChange(e, field.field_name)}
+            onInput={(e) => handleChange(e, field.field_name, formName)}
             type={field.input_type}
           ></Input>
         </>
@@ -88,12 +84,13 @@ const [value,setvalue] = useState('')
       return (
         <Input
           placeholder="Search..."
+          name={field.field_name}
           type="Search"
           onInput={(e) => console.log("Search input:", e.target.value)}
           onChange={(e) => console.log("Search committed:", e.target.value)}
         />
       );
-    case "Select":
+    case "select":
       return (
         <>
           <Input
@@ -105,10 +102,10 @@ const [value,setvalue] = useState('')
             }
             name={field.field_name}
             value={inputvalue}
-            onInput={(e) => handleChange(e, field.field_name)}
+            //onInput={(e) => handleChange(e, field.field_name,formName)}
             type={field.input_type}
             style={{
-              width: "470px",
+              width: "430px",
             }}
           >
             {productCollection.map((item, idx) => (
@@ -123,7 +120,7 @@ const [value,setvalue] = useState('')
             onAfterClose={() => setDialogOpen(false)}
             footer={<Button onClick={() => setDialogOpen(false)}>Close</Button>}
           >
-            <List onItemClick={(e)=>handleDialogItemClick(e)}>
+            <List onItemClick={handleDialogItemClick}>
               {productCollection.map((item, idx) => (
                 <ListItemStandard key={idx} value={item.Name}>
                   {item.Name}
@@ -142,13 +139,16 @@ const [value,setvalue] = useState('')
       return (
         <DatePicker
           value={value}
-          onChange={(e) => handleChange(e, field.field_name)}
+          name={field.field_name}
+          onChange={(e) => handleChange(e, field.field_name, formName)}
         />
       );
     case "checkbox":
       return (
         <CheckBox
-          onChange={(e) => handleChange(e, field.field_name)}
+          checked={value}
+          name={field.field_name}
+          onChange={(e) => handleChange(e, field.field_name, formName)}
           text="CheckBox"
           valueState="None"
         />
@@ -158,11 +158,15 @@ const [value,setvalue] = useState('')
         <>
           <Select
             onClose={function Xs() {}}
+            name={field.field_name}
             value={value}
             onLiveChange={function Xs() {}}
             onOpen={function Xs() {}}
             valueState="None"
-            onChange={handleSelectChange}
+            onChange={(e) => {
+              handleSelectChange(e);
+              handleChange(e, field.field_name, formName);
+            }}
             style={{
               width: "300px", // fixed width
               marginLeft: "0", // no left margin
@@ -183,7 +187,9 @@ const [value,setvalue] = useState('')
       return (
         <TextArea
           value={value}
-          onInput={(e) => handleChange(e, field.field_name)}
+          name={field.field_name}
+          onChange={(e) => handleChange(e, field.field_name, formName)}
+          onInput={(e) => handleChange(e, field.field_name, formName)}
         />
       );
     default:

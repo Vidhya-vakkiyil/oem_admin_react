@@ -6,7 +6,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 // project imports
 
-
 // redux slice
 import { forgotPassword } from "../../../store/slices/authSlice";
 import { AnimatedUI5Button } from "./AnimatedUI5Button";
@@ -23,6 +22,7 @@ import {
 export default function AuthLogin() {
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { forgotStatus, forgotMessage } = useSelector((state) => state.auth);
 
   const handleSubmit = (e) => {
@@ -54,19 +54,27 @@ export default function AuthLogin() {
         </MessageStrip>
       )}
       <form onSubmit={handleSubmit}>
-        <FormItem
-          label={<Label required>Email Address</Label>}
-          style={{ marginBottom: "1rem" }}
-        >
-          <Input
-            id="outlined-adornment-email-login"
-            name="email"
-            type="Email"
-            value={email}
-            required
-            onInput={(e) => setEmail(e.target.value)}
-          />
-        </FormItem>
+       
+         
+          <FlexBox direction="Column" style={{ width: "100%", gap: "0.5rem" }}>
+            {/* Email Row */}
+            <FlexBox
+              direction="Column"
+              alignItems="Center"
+              style={{ gap: "0.5rem" }}
+            >
+              <Input
+                style={{ width: "100%" }}
+                type="Email"
+                value={email}
+                name="email"
+                required
+                onInput={(e) => setEmail(e.target.value)}
+                placeholder="Enter email"
+               
+              />
+            </FlexBox>
+          </FlexBox>
 
         <FlexBox
           justifyContent="SpaceBetween"
@@ -78,6 +86,10 @@ export default function AuthLogin() {
             href="/login"
             design="Emphasized" // Optional for styling
             style={{ textDecoration: "none" }}
+            onClick={(e) => {
+                e.preventDefault();
+                navigate("/login");
+              }}
           >
             Login?
           </Link>
@@ -85,13 +97,15 @@ export default function AuthLogin() {
 
         <FlexBox
           direction="Column"
-          style={{ marginTop: "1rem", width: "100%" }}
+          alignItems="Center"
+          justifyContent="Center"
+          style={{ marginTop: "1rem", width: "80%" }}
         >
           <Button
             design="Emphasized"
             type="Submit"
             disabled={forgotStatus === "loading"}
-            style={{ width: "100%" }}
+            //style={{ width: "80%" }}
           >
             {forgotStatus === "loading" ? (
               <BusyIndicator active size="Small" />

@@ -84,8 +84,22 @@ const FormFieldForm = ({
   };
 
   useEffect(() => {
-    dispatch(fetchForm());
-    dispatch(fetchFormSection());
+   // dispatch(fetchForm());
+    //dispatch(fetchFormSection());
+     const fetchData = async () => {
+              try {
+                const res = await dispatch(fetchForm()).unwrap();
+                console.log("resusers", res);
+                dispatch(fetchFormSection());
+                if (res.message === "Please Login!") {
+                  navigate("/");
+                }
+              } catch (err) {
+                console.log("Failed to fetch user", err.message);
+                err.message && navigate("/");
+              }
+            };
+            fetchData();
   }, [dispatch]);
 
   return (
@@ -134,7 +148,8 @@ const FormFieldForm = ({
                   FormFields
                 </BreadcrumbsItem>
                 <BreadcrumbsItem data-route="admin/FormFields/create">
-                  Create Form Fields
+                             {mode==="edit" ? "Edit Form Field" : "Create Form Field"}
+
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>

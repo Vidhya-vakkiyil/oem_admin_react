@@ -11,32 +11,32 @@ import {
   Search,
   Tag,
   Title,
+  Token,
 } from "@ui5/webcomponents-react";
 import { lazy } from "react";
 import Loadable from "../../../../ui-component/Loadable";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchForm,
-  deleteForm,
-} from "../../../../store/slices/formmasterSlice";
 import { useNavigate } from "react-router-dom";
 import Admin from "../../Admin";
-const ViewFormMaster = Loadable(lazy(() => import("./ViewFormMaster")));
+import { deleteRole, fetchRoles } from "../../../../store/slices/roleSlice";
+import { fetchUserMenus } from "../../../../store/slices/usermenusSlice";
+const ViewUserRoleMenu = Loadable(lazy(() => import("./ViewUserRoleMenu")));
 
-const FormMaster = () => {
-  const dispatch = useDispatch();
+const UserRoleMenuMaster = () => {
+  const dispatch = useDispatch(); 
   const navigate = useNavigate();
-  const { forms, loading } = useSelector((state) => state.forms);
+   const { usermenus, loading } = useSelector((state) => state.usermenus);
+ 
   const [search, setSearch] = useState("");
   const [layout, setLayout] = useState("OneColumn");
   const [ViewId, setViewId] = useState("");
 
   useEffect(() => {
-    //dispatch(fetchForm());
+    //dispatch(fetchRoles());
     const fetchData = async () => {
       try {
-        const res = await dispatch(fetchForm()).unwrap();
+        const res = await dispatch(fetchUserMenus()).unwrap();
         console.log("resusers", res);
 
         if (res.message === "Please Login!") {
@@ -49,50 +49,73 @@ const FormMaster = () => {
     };
     fetchData();
   }, [dispatch]);
-  const handleDelete = async (form) => {
-    if (window.confirm(`Are you sure to delete form: ${form.name}?`)) {
+  const handleDelete = async (role) => {
+    if (
+      window.confirm(
+        `Are you sure to delete user: ${role.first_name} ${role.last_name}?`
+      )
+    ) {
       try {
-        const res = await dispatch(deleteForm(form.id)).unwrap();
+        const res = await dispatch(deleteRole(role.id)).unwrap();
         if (res.message === "Please Login!") {
           navigate("/login");
         }
       } catch (error) {
-        console.error("Error deleting form:", error);
+        console.error("Error deleting role:", error);
       }
     }
   };
 
-  const handleEdit = (form) => {
-    navigate(`/admin/FormMaster/edit/${form.id}`);
+  const handleEdit = (role) => {
+    navigate(`/admin/roles/edit/${role.id}`);
   };
 
-  const handleView = (form) => {
-    //navigate(`/FormMaster/${form.id}`);
-    console.log("form", form);
-    setViewId(form.id);
+  const handleView = (role) => {
+    //navigate(`/roles/${user.id}`);
+    setViewId(role.id);
   };
 
-  const filteredRows =
-    forms &&
-    forms?.filter(
-      (form) =>
-        form.name.toLowerCase().includes(search.toLowerCase()) ||
-        form.display_name.toLowerCase().includes(search.toLowerCase())
-    );
-
+  const filteredRows = usermenus?.filter((role) =>
+    role.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const editRow = (row) => {
+    console.log("Edit Row:", row);
+  };
   const columns = useMemo(
     () => [
       {
-        Header: "Form Name",
+        Header: "UserRoleMenu Name",
         accessor: "name",
+        width: 220,
       },
       {
-        Header: "Display Name",
-        accessor: "display_name",
+        Header: "Permissions",
+        accessor: "Permissions",
+        width: 430,
+        height: 400,
+        Cell: ({ row }) =>
+          row.original.Permissions ? (
+            <FlexBox
+              style={{
+                overflowX: "auto", // vertical scroll only
+                padding: "1rem", // optional
+                border: "1px solid #ccc", // just for visual debugging
+              }}
+            >
+              {row.original.Permissions.map((perm) => (
+                <Token text={perm.name} />
+              ))}
+            </FlexBox>
+          ) : (
+            "No Permissions"
+          ),
       },
+
       {
         Header: "Status",
         accessor: "status",
+        width: 220,
+
         Cell: ({ row }) =>
           row.original.status === 1 ? (
             <Tag children="Active" design="Positive" size="S" />
@@ -108,7 +131,7 @@ const FormMaster = () => {
         disableResizing: true,
         disableSortBy: true,
         id: "actions",
-        width: 120,
+        width: 220,
 
         Cell: (instance) => {
           const { cell, row, webComponentsReactProperties } = instance;
@@ -153,7 +176,7 @@ const FormMaster = () => {
         <Bar
           design="Header"
           startContent={
-            <div style={{ width: "150px" }}>
+            <div style={{ width: "100px" }}>
               <Breadcrumbs
                 design="Standard"
                 separators="Slash"
@@ -163,8 +186,8 @@ const FormMaster = () => {
                 }}
               >
                 <BreadcrumbsItem data-route="/admin">Admin</BreadcrumbsItem>
-                <BreadcrumbsItem data-route="/admin/FormMaster">
-                  FormMaster
+                <BreadcrumbsItem data-route="/admin/roles">
+                  UserRoleMenus
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>
@@ -172,13 +195,13 @@ const FormMaster = () => {
           endContent={
             <Button
               design="Emphasized"
-              onClick={() => navigate("/admin/FormMaster/create")}
+              onClick={() => navigate("/admin/UserRoleMenus/create")}
             >
-              Add Form
+              Add UserRoleMenu
             </Button>
           }
         >
-          <Title level="H4">Form List</Title>
+          <Title level="H4">UserRoleMenu List</Title>
         </Bar>
       }
     >
@@ -213,12 +236,12 @@ const FormMaster = () => {
               <FlexBox direction="Column">
                 <div>
                   <FlexBox direction="Column">
-                    {console.log("filteredRows", filteredRows)}
                     <AnalyticalTable
                       columns={columns}
                       data={filteredRows || []}
-                      header={"  FormMaster list(" + filteredRows.length + ")"}
-                      visibleRows={8}
+                      header={"  UserRoleMenus list(" + filteredRows.length + ")"}
+                      visibleRows={5}
+                      rowHeight={60}
                       onAutoResize={() => {}}
                       onColumnsReorder={() => {}}
                       onGroup={() => {}}
@@ -244,7 +267,7 @@ const FormMaster = () => {
                         onClick={() => setLayout("OneColumn")}
                       />
                     }
-                    startContent={<Title level="H5">Preview FormMaster</Title>}
+                    startContent={<Title level="H5">Preview UserRoleMenus</Title>}
                   ></Bar>
                 }
               >
@@ -258,7 +281,7 @@ const FormMaster = () => {
                     verticalAlign: "middle",
                   }}
                 >
-                  <ViewFormMaster id={ViewId} />
+                  <ViewUserRoleMenu id={ViewId} />
                 </div>
               </Page>
             }
@@ -269,4 +292,4 @@ const FormMaster = () => {
   );
 };
 
-export default FormMaster;
+export default UserRoleMenuMaster

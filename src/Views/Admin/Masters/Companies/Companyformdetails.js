@@ -114,7 +114,8 @@ const Companyformdetails = ({
                   Companies
                 </BreadcrumbsItem>
                 <BreadcrumbsItem data-route="/admin/companies/create">
-                  Create Company
+            {mode === "edit" ? "Edit Company" : "Create Company"}
+                  
                 </BreadcrumbsItem>
               </Breadcrumbs>
             </div>

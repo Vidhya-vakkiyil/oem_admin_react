@@ -49,7 +49,21 @@ const ManageSalesOrder = () => {
   );
 
   useEffect(() => {
-    dispatch(fetchCompanyFormfields());
+    //dispatch(fetchCompanyFormfields());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchCompanyFormfields()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   const [tableData, settableData] = useState(ManageSalesOrderTableData);
   const [viewItem, setViewItem] = useState([]);

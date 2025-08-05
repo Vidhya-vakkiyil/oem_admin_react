@@ -72,7 +72,21 @@ const EditFormfield = ({
   };
 
   useEffect(() => {
-    dispatch(fetchFormSection());
+    //dispatch(fetchFormSection());
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(fetchFormSection()).unwrap();
+        console.log("resusers", res);
+
+        if (res.message === "Please Login!") {
+          navigate("/");
+        }
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        err.message && navigate("/");
+      }
+    };
+    fetchData();
   }, [dispatch]);
   return (
     <Dialog
@@ -392,7 +406,7 @@ const EditFormfield = ({
                   >
                     <Option>Select</Option>
 
-                    <Option value='1'>Active</Option>
+                    <Option value="1">Active</Option>
                     <Option value="0">Inactive</Option>
                   </Select>
                 )}
