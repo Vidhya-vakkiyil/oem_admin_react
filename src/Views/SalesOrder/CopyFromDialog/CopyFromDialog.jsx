@@ -24,18 +24,22 @@ const CopyFromDialog = (props) => {
     type,
     saveService,
     copyRequestDetails,
+    fetchLoadMorePOData,
+    isLoadingMore,
+    setIsLoadingMore,
   } = props;
   const [rowSelection, setRowSelection] = useState([]);
   const [openPurchaseItem, setOpenPurchaseItem] = useState(false);
   const [selectedPurList, setSelectedPurlist] = useState([]);
   const [originalSelectedPurList, setOriginalSelectedPurList] = useState([]);
+
   const handleFilterChange = (e, fieldname) => {
     console.log("handleFilterChange", e.target.value);
     const selectedOption = e.target; //e.detail.selectedOption;
     if (!selectedOption) return;
 
     const selectedValue = selectedOption.value || selectedOption.textContent;
-    console.log("Selected value:", selectedValue,fieldname);
+    console.log("Selected value:", selectedValue, fieldname);
 
     // ✅ Save selected value for that field
     setInputValue((prev) => ({
@@ -50,7 +54,7 @@ const CopyFromDialog = (props) => {
         .toLowerCase()
         .includes(selectedValue.toLowerCase()),
     );
-console.log("filteredList", filteredList);
+    console.log("filteredList", filteredList);
     setRequestList(filteredList);
   };
   const onitemchildRowSelect = (e) => {
@@ -104,14 +108,14 @@ console.log("filteredList", filteredList);
         Header: "Vendor Code",
         accessor: "CardCode",
       },
-     {
+      {
         Header: "Vendor Name",
         accessor: "CardName",
       },
       {
-        Header:"Project Code",
-        accessor:"U_PrjCode"
-      }
+        Header: "Project Code",
+        accessor: "U_PrjCode",
+      },
     ],
     [],
   );
@@ -209,21 +213,33 @@ console.log("filteredList", filteredList);
               Clear Filter
             </Button>
           </FlexBox>
-          {console.log("requestList", requestList,originalporequestList)}
+          {console.log("requestList", requestList, originalporequestList)}
+<div
+  style={{
+    //height: "500px",
+    overflow: "auto",
+  }}
+>
           <AnalyticalTable
             data={requestList}
             columns={itemcolumns}
-            //header={`Items (${requestList.length})`}
             selectionMode="Single"
             selectedRowIds={rowSelection}
             onRowSelect={onitemchildRowSelect}
-            visibleRows={6}
+            visibleRows={10}
+            minRows={6}
+            scaleWidthMode="Smart"
+            infiniteScroll
+            onLoadMore={fetchLoadMorePOData}
+            onRowExpandChange={() => {}}
+            onSort={() => {}}
+            onTableScroll={() => {}}
             style={{
               border: "1px solid #ccc" /* keeps a grey outline */,
               borderRadius: "4px",
               padding: "0.25rem",
             }}
-          />
+          /></div>
         </FlexBox>
       </Dialog>
       <ListPurItemDialog
@@ -236,8 +252,8 @@ console.log("filteredList", filteredList);
         setOriginalSelectedPurList={setOriginalSelectedPurList}
         saveItem={saveItem}
         saveService={saveService}
-         inputValue={inputValue}
-  setInputValue={setInputValue}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
         type={type}
       />
     </>

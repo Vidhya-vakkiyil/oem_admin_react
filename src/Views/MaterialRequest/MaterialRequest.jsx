@@ -108,6 +108,8 @@ export default function MaterialRequest() {
   const [roundingEnabled, setRoundingEnabled] = useState(false);
   const [roundOff, setRoundOff] = useState("");
   const [selectedcardcode, setSelectedCardCode] = useState([]);
+  const [page, setPage] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [dimensionData, setDimensionData] = useState([]);
   const [currencyType, setCurrencyType] = useState("GBP");
@@ -127,7 +129,7 @@ export default function MaterialRequest() {
   const [originalboqrequestList, setOriginalboqrequestlist] = useState([]);
   const [originalporequestList, setOriginalporequestlist] = useState([]);
   const [inputValue, setInputValue] = useState({});
-  const [SQDocNum,setSQDocNum]=useState("");
+  const [SQDocNum, setSQDocNum] = useState("");
   const [itemTabledata, setitemTableData] = useState([
     {
       slno: 1,
@@ -275,6 +277,35 @@ export default function MaterialRequest() {
 
     setUserDefinedData(orderListById.formData);
   };
+  const fetchLoadMorePOData = async () => {
+    try {
+      setIsCopyFromPurchase(true);
+      //const res = await dispatch(fetchPurchaseRequest()).unwrap();
+      const res = await dispatch(
+        fetchPurchaseOrder({ top: 20, skip: page * 20 }),
+      ).unwrap();
+      const currentType =
+        type === "Item" ? "dDocument_Items" : "dDocument_Service";
+      const raw = res?.data?.value ?? res?.data ?? res?.value ?? res;
+
+      setRequestList((prev) => [
+      ...prev,
+      ...raw.filter((val) => val.DocType === currentType),
+    ]);
+
+    setOriginalporequestlist((prev) => [
+      ...prev,
+      ...raw.filter((val) => val.DocType === currentType),
+    ]);
+      console.log("currentType", currentType, raw, res?.data);
+      setOpenCopyFromDialog(true);
+      setPage((prev) => prev + 1);
+    } catch (error) {
+      console.error("Load more failed", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
   const copyFromsPO = async () => {
     setIsCopyFromPurchase(true);
     //const res = await dispatch(fetchPurchaseRequest()).unwrap();
@@ -285,10 +316,12 @@ export default function MaterialRequest() {
       type === "Item" ? "dDocument_Items" : "dDocument_Service";
     const raw = res?.data?.value ?? res?.data ?? res?.value ?? res;
 
-    setRequestList(raw.filter((val) => val.DocType === currentType));
-    setOriginalporequestlist(raw.filter((val) => val.DocType === currentType));
+     setRequestList(raw.filter((val) => val.DocType === currentType));
+     setOriginalporequestlist(raw.filter((val) => val.DocType === currentType));
+   
     console.log("currentType", currentType, raw, res?.data);
     setOpenCopyFromDialog(true);
+    setPage(1);
   };
   const handleChange = (e, name, formName) => {
     const newValue = e.target.value;
@@ -363,7 +396,7 @@ export default function MaterialRequest() {
         U_ReqCode: summaryData.UserCode || "",
         U_ReqName: summaryData.RequestorName,
         U_Dept: summaryData.Department || "",
-        U_SQDocNum:SQDocNum,
+        U_SQDocNum: SQDocNum,
         U_DocTotal: summaryData.DocTotal || 0,
         HLB_MRQ1Collection: itemTabledata.map((item) => ({
           U_ItmSerCode: item.ItemCode,
@@ -379,12 +412,12 @@ export default function MaterialRequest() {
           U_AvlQty: item.availableQty || 0,
           U_Whs: item.warehouse || "",
           U_SQlineNum: item.BoqLineNum || "",
-          U_HLB_Rmarks:item.remarks,
+          U_HLB_Rmarks: item.remarks,
         })),
       };
       let grpopayload = {
         CardCode: formData.CardCode || selectedcardcode,
-        CardName:formData.CusName || "",
+        CardName: formData.CusName || "",
         DocDate: formData.RequisitionDate
           ? new Date(formData.RequisitionDate)
               .toISOString()
@@ -414,18 +447,18 @@ export default function MaterialRequest() {
         DocTime: formData.RequisitionTime,
         DocEntry: formData.DocEntry,
         Comments: formData.Remarks,
-         U_MRNo: formData.docEntry,
-         U_OEM_UEMAIL:null,
-         U_OED_UID:null,
+        U_MRNo: formData.docEntry,
+        U_OEM_UEMAIL: null,
+        U_OED_UID: null,
         DocumentStatus: "open",
         ContactPerson: formData.ContactPerson || "",
         NumAtCard: formData.CustomerRefNo || "",
         DocType: "dDocument_Items",
         U_ReqCode: summaryData.RequestorCode || "",
         U_ReqName: summaryData.RequestorName,
-         U_PrjCode: formData.ProjectCode || "",
+        U_PrjCode: formData.ProjectCode || "",
         U_PrjDesc: formData.ProjectName || "",
-        DocumentsOwner:selectedItemOwner,
+        DocumentsOwner: selectedItemOwner,
         DocumentLines: itemTabledata.map((line) => ({
           ItemCode: line.ItemCode,
           ItemDescription: line.ItemName,
@@ -438,8 +471,8 @@ export default function MaterialRequest() {
           UoMEntry: line.UOMEntry,
           U_HLB_Rmarks: line.remarks,
           U_MRDocEntry: formData.docEntry,
-        U_MRDocNo: formData.docNum || "",
-        U_MRLine: line.BoqLineNum,
+          U_MRDocNo: formData.docNum || "",
+          U_MRLine: line.BoqLineNum,
           //TaxCode: line.TaxCode,
           //VatGroup: line.TaxCode,
           //DiscountPercent: Number(line.discount),
@@ -692,10 +725,10 @@ export default function MaterialRequest() {
             id: index,
             slno: index + 1,
             task: item.U_Task, // usually LineNum is 0-based
-            BoqLineNum: item.U_SQlineNum || item.U_SQMRlinenum||item.LineNum,
+            BoqLineNum: item.U_SQlineNum || item.U_SQMRlinenum || item.LineNum,
             ItemCode: item.ItemCode,
             ItemName: item.ItemDescription,
-            fulldescription: item.U_HLB_Description||item.U_HLB_FullDesc,
+            fulldescription: item.U_HLB_Description || item.U_HLB_FullDesc,
             quantity: item.Quantity,
             amount: item.Price,
             linetotal: item.LineTotal,
@@ -1167,9 +1200,12 @@ export default function MaterialRequest() {
         saveService={saveService}
         type={type}
         setType={setType}
+        fetchLoadMorePOData={fetchLoadMorePOData}
+        isLoadingMore={isLoadingMore}
+        setIsLoadingMore={setIsLoadingMore}
       />
       <BOQListDialog
-      setSQDocNum={setSQDocNum}
+        setSQDocNum={setSQDocNum}
         open={isBoqListopem}
         setOpen={setisBoqListopem}
         boqrequestList={boqrequestList}
