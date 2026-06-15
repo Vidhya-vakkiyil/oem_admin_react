@@ -253,37 +253,7 @@ export default function MaterialRequest() {
       DocumentLines: orderListById.DocumentLines || [],
       formData: orderListById.formData,
     });
- if (orderListById?.DocumentLines?.length > 0) {
-          setType("Item");
 
-          const mappedItems = orderListById.DocumentLines.map(
-            (item, index) => ({
-              id: index + 1,
-              slno: index + 1,
-              task: item.task || "",
-              BoqLineNum: item.BoqLineNum || "",
-              ItemCode: item.ItemCode || "",
-              ItemName: item.ItemDescription || "",
-              fulldescription: item.U_HLB_FullDesc || "",
-              quantity: item.quantity || 0,
-              amount: item.amount || 0,
-              linetotal: item.linetotal || 0,
-              project: item.ProjectCode || "",
-              UOMEntry:item.UoMEntry||"",
-            UOMCode: item.UoMCode,
-              warehouse: item.WarehouseCode || "",
-              stage: item.stage || "",
-              issuedQty: item.issuedQty || 0,
-              inStock: item.inStock || 0,
-              availableQty: item.availableQty || 0,
-              rateTotal: item.rateTotal || 0,
-              remarks: item.U_HLB_Rmarks || "",
-            }),
-          );
-
-          setitemData(mappedItems);
-          setitemTableData(mappedItems);
-        }
     setSummaryData((prev) => ({
       ...prev,
       Remark: orderListById.Comments,
@@ -722,10 +692,10 @@ export default function MaterialRequest() {
             id: index,
             slno: index + 1,
             task: item.U_Task, // usually LineNum is 0-based
-            BoqLineNum: item.U_SQlineNum || item.U_SQMRlinenum,
+            BoqLineNum: item.U_SQlineNum || item.U_SQMRlinenum||item.LineNum,
             ItemCode: item.ItemCode,
             ItemName: item.ItemDescription,
-            fulldescription: item.U_HLB_Description,
+            fulldescription: item.U_HLB_Description||item.U_HLB_FullDesc,
             quantity: item.Quantity,
             amount: item.Price,
             linetotal: item.LineTotal,

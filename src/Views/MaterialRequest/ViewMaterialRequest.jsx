@@ -229,7 +229,7 @@ const ViewMaterialRequest = () => {
           setFormData({
         docEntry: orderListById.DocEntry,
             docNum:orderListById.DocNum,
-            RequisitionNo: orderListById.U_ReqCode,
+            RequisitionNo: orderListById.U_ReqCode||orderListById.DocEntry,
             RequisitionDate: orderListById.U_DocDate || "",
             RequisitionTime: orderListById.U_ReqTime || "",
             RequiredDate: orderListById.U_ReqDate ||orderListById.RequriedDate,
@@ -444,6 +444,7 @@ const ViewMaterialRequest = () => {
             DocumentStatus: orderListById.DocumentStatus,
           });
           setUserDefinedData(orderListById.formData);
+          setSelectedItemOwner(orderListById.OwnerCode)
         }
       } catch (err) {
         console.error("Failed to fetch order:", err);
