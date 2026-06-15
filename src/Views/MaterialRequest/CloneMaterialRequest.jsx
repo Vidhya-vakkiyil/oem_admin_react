@@ -367,7 +367,7 @@ export default function CloneMaterialRequest() {
         //VatGroup: line.TaxCode || "E2",
         WarehouseCode:
           line.warehouse || warehousesdetails?.value?.[0]?.WarehouseCode,
-        ProjectCode: formData.ProjectCode || "",
+        //ProjectCode: formData.ProjectCode || "",
         UoMEntry:line.UOMEntry,
         UoMCode: line.UOMCode,
         DiscountPercent: Number(line.discount || 0),
@@ -383,7 +383,8 @@ export default function CloneMaterialRequest() {
         U_PrjCode: formData.ProjectCode || "",
         U_PrjDesc: formData.ProjectName || "",
         Comments: formData.Remarks || "",
-         ReqType: summaryData.RequestorCode,
+         ReqType: summaryData.RequestorCode==="U"?12:171,
+         SendNotification:"tNO",
         ReqCode: summaryData.UserCode || "",
         ReqName: summaryData.RequestorName,
         U_Dept: summaryData.Department || "",

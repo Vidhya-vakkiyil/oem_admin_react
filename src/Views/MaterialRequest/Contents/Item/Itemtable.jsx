@@ -246,17 +246,23 @@ const Itemtable = (props) => {
   };
   const handlechangeUser = (e) => {
     const selectedUserId = String(e.target.value || e.detail?.selectedOption?.value);
-
-    const selectedUser = userList.find(
+    console.log("selectedUserId11",selectedUserId)
+    let selectedUser={}
+    if(summaryData.RequestorCode==="U"){
+       selectedUser= userList.find(
       (user) => user.UserCode === selectedUserId,
     );
+    }else{
+      selectedUser=employeeList.find((emp)=>emp.EmployeeID===Number(selectedUserId));
+    }
+    
 
-    console.log(selectedUserId, selectedUser);
+    console.log(employeeList,selectedUserId, selectedUser);
 
     setSummaryData((prev) => ({
       ...prev,
-      UserCode: selectedUser?.UserCode ?? "",
-      RequestorName: selectedUser?.UserName ?? "",
+      UserCode: summaryData.RequestorCode==="U"?selectedUser?.UserCode :selectedUser.EmployeeID,
+      RequestorName: summaryData.RequestorCode==="U"?selectedUser?.UserName :selectedUser.FirstName,
       eMail: selectedUser?.eMail ?? "",
       Department: selectedUser?.Department ?? "",
     }));
@@ -1663,8 +1669,8 @@ const Itemtable = (props) => {
                     ))
                   : employeeList.length > 0 &&
                     employeeList.map((emp) => (
-                      <Option key={emp.id} value={emp.id}>
-                        {emp.name}
+                      <Option key={emp.EmployeeID} value={emp.EmployeeID}>
+                        {emp.FirstName}
                       </Option>
                     ))}
               </Select>

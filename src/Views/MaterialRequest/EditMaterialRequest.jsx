@@ -1041,7 +1041,6 @@ const EditMaterialRequest = () => {
           U_ReqQty: item.quantity || 0,
           U_InStock: item.inStock || 0,
           U_Project: item.project || "",
-          UoMEntry: item.UOMEntry || null,
             U_UOM: item.UOMCode,
           U_Stage: item.stage || "",
           U_UnitPrice: item.amount || 0,

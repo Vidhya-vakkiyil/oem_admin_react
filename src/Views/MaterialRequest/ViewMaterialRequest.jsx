@@ -404,9 +404,18 @@ const ViewMaterialRequest = () => {
 
             // 3. Preselect rows
           }
+          console.log("orderListById.U_ReqType||orderListById.ReqType",orderListById.U_ReqType||orderListById.ReqType)
+          let reqCode=""
+          if(orderListById.U_ReqType||orderListById.ReqType=="12"||orderListById.U_ReqType||orderListById.ReqType==="U"){
+            reqCode="U";
+          }else if(orderListById.U_ReqType||orderListById.ReqType=="171"||orderListById.U_ReqType||orderListById.ReqType==="E"){
+            reqCode="E";
+
+          }
+           console.log("orderListById.U_ReqType||orderListById.ReqType",orderListById.U_ReqType||orderListById.ReqType,reqCode)
           setSummaryData((prev) => ({
             ...prev,
-            RequestorCode: orderListById.U_ReqType||orderListById.ReqType||"U",
+            RequestorCode: reqCode,
             
             UserCode:orderListById.U_ReqCode||orderListById.ReqCode||orderListById.Requester,
             RequestorName: orderListById.U_ReqName||orderListById.RequesterName,
