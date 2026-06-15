@@ -127,6 +127,7 @@ export default function MaterialRequest() {
   const [originalboqrequestList, setOriginalboqrequestlist] = useState([]);
   const [originalporequestList, setOriginalporequestlist] = useState([]);
   const [inputValue, setInputValue] = useState({});
+  const [SQDocNum,setSQDocNum]=useState("");
   const [itemTabledata, setitemTableData] = useState([
     {
       slno: 1,
@@ -213,23 +214,29 @@ export default function MaterialRequest() {
     console.log(
       "copyRequestDetailsorderListById",
       orderListById,
-      orderListById.CardCode,
+      orderListById.DocumentLines[0].OwnerCode,
     );
     setSelectedCardCode(orderListById.CardCode);
     setFormData({
       docEntry: orderListById.DocEntry,
       docNum: orderListById.DocNum,
       RequisitionNo: orderListById.DocEntry,
-      RequisitionDate: orderListById.RequisitionDate ? new Date(orderListById.RequisitionDate).toISOString().split("T")[0]
+      RequisitionDate: orderListById.DocDate
+        ? new Date(orderListById.DocDate).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0],
 
       CusCode: orderListById.CardCode,
       CusName: orderListById.CardName,
-      RequisitionTime: orderListById.U_ReqTime? orderListById.U_ReqTime : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      RequisitionTime: orderListById.DocTime
+        ? orderListById.DocTime
+        : new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
 
-      ProjectCode: orderListById.U_PrjCode||orderListById.Project,
+      ProjectCode: orderListById.U_PrjCode || orderListById.Project,
       ProjectName: orderListById.U_PrjDesc,
-      Remarks: orderListById.U_Remark,
+      Remarks: orderListById.U_Remark || orderListById.Comments,
       CardName: orderListById.CardName,
       DocDueDate: orderListById.DocDueDate
         ? new Date(orderListById.DocDueDate).toISOString().split("T")[0]
@@ -246,7 +253,37 @@ export default function MaterialRequest() {
       DocumentLines: orderListById.DocumentLines || [],
       formData: orderListById.formData,
     });
+ if (orderListById?.DocumentLines?.length > 0) {
+          setType("Item");
 
+          const mappedItems = orderListById.DocumentLines.map(
+            (item, index) => ({
+              id: index + 1,
+              slno: index + 1,
+              task: item.task || "",
+              BoqLineNum: item.BoqLineNum || "",
+              ItemCode: item.ItemCode || "",
+              ItemName: item.ItemDescription || "",
+              fulldescription: item.U_HLB_FullDesc || "",
+              quantity: item.quantity || 0,
+              amount: item.amount || 0,
+              linetotal: item.linetotal || 0,
+              project: item.ProjectCode || "",
+              UOMEntry:item.UoMEntry||"",
+            UOMCode: item.UoMCode,
+              warehouse: item.WarehouseCode || "",
+              stage: item.stage || "",
+              issuedQty: item.issuedQty || 0,
+              inStock: item.inStock || 0,
+              availableQty: item.availableQty || 0,
+              rateTotal: item.rateTotal || 0,
+              remarks: item.U_HLB_Rmarks || "",
+            }),
+          );
+
+          setitemData(mappedItems);
+          setitemTableData(mappedItems);
+        }
     setSummaryData((prev) => ({
       ...prev,
       Remark: orderListById.Comments,
@@ -271,14 +308,16 @@ export default function MaterialRequest() {
   const copyFromsPO = async () => {
     setIsCopyFromPurchase(true);
     //const res = await dispatch(fetchPurchaseRequest()).unwrap();
-    const res = await dispatch( fetchPurchaseOrder({ top:20, skip: 0 })).unwrap();
+    const res = await dispatch(
+      fetchPurchaseOrder({ top: 20, skip: 0 }),
+    ).unwrap();
     const currentType =
       type === "Item" ? "dDocument_Items" : "dDocument_Service";
     const raw = res?.data?.value ?? res?.data ?? res?.value ?? res;
 
     setRequestList(raw.filter((val) => val.DocType === currentType));
     setOriginalporequestlist(raw.filter((val) => val.DocType === currentType));
-    console.log("currentType", currentType, raw,res?.data);
+    console.log("currentType", currentType, raw, res?.data);
     setOpenCopyFromDialog(true);
   };
   const handleChange = (e, name, formName) => {
@@ -345,113 +384,129 @@ export default function MaterialRequest() {
           : new Date().toISOString().split("T")[0].replace(/-/g, ""),
         U_ReqTime: formData.RequisitionTime,
         U_CardCode: formData.CusCode || "",
+        U_CardName: formData.CusName || "",
+
         U_PrjCode: formData.ProjectCode || "",
         U_PrjDesc: formData.ProjectName || "",
         U_Remark: formData.Remarks || "",
-        U_ReqType: "U",
-        U_ReqCode: summaryData.RequestorCode || "",
+        U_ReqType: summaryData.RequestorCode,
+        U_ReqCode: summaryData.UserCode || "",
         U_ReqName: summaryData.RequestorName,
         U_Dept: summaryData.Department || "",
+        U_SQDocNum:SQDocNum,
         U_DocTotal: summaryData.DocTotal || 0,
         HLB_MRQ1Collection: itemTabledata.map((item) => ({
           U_ItmSerCode: item.ItemCode,
           U_ItemDesc: item.ItemName,
+          U_SerDesc: item.fulldescription,
           U_ReqQty: item.quantity || 0,
-          U_UOM: item.UOM,
           U_InStock: item.inStock || 0,
-          U_Project: item.project || "",
+          U_Project: item.project || formData.ProjectCode || "",
+          U_UOM: item.UOMCode,
           U_Stage: item.stage || "",
           U_UnitPrice: item.amount || 0,
           U_LineTotal: item.quantity * item.amount || 0,
           U_AvlQty: item.availableQty || 0,
           U_Whs: item.warehouse || "",
           U_SQlineNum: item.BoqLineNum || "",
+          U_HLB_Rmarks:item.remarks,
         })),
       };
-let grpopayload={CardCode: formData.CardCode || selectedcardcode,
-          DocDate: new Date().toISOString().split("T")[0].replace(/-/g, ""),//formData.PostingDate
-            // ? new Date(formData.PostingDate)
-            //     .toISOString()
-            //     .split("T")[0]
-            //     .replace(/-/g, "")
-            // : new Date().toISOString().split("T")[0].replace(/-/g, ""),
-          DocDueDate: new Date().toISOString().split("T")[0].replace(/-/g, ""),//formData.DocDueDate
-            // ? new Date(formData.DocDueDate)
-            //     .toISOString()
-            //     .split("T")[0]
-            //     .replace(/-/g, "")
-            // : new Date().toISOString().split("T")[0].replace(/-/g, ""),
-          TaxDate: new Date().toISOString().split("T")[0].replace(/-/g, ""),//formData.TaxDate
-            // ? new Date(formData.TaxDate)
-            //     .toISOString()
-            //     .split("T")[0]
-            //     .replace(/-/g, "")
-            // : new Date().toISOString().split("T")[0].replace(/-/g, ""),
+      let grpopayload = {
+        CardCode: formData.CardCode || selectedcardcode,
+        CardName:formData.CusName || "",
+        DocDate: formData.RequisitionDate
+          ? new Date(formData.RequisitionDate)
+              .toISOString()
+              .split("T")[0]
+              .replace(/-/g, "")
+          : new Date().toISOString().split("T")[0].replace(/-/g, ""),
+        DocDueDate: new Date().toISOString().split("T")[0].replace(/-/g, ""), //formData.DocDueDate
+        // ? new Date(formData.DocDueDate)
+        //     .toISOString()
+        //     .split("T")[0]
+        //     .replace(/-/g, "")
+        // : new Date().toISOString().split("T")[0].replace(/-/g, ""),
+        TaxDate: new Date().toISOString().split("T")[0].replace(/-/g, ""), //formData.TaxDate
+        // ? new Date(formData.TaxDate)
+        //     .toISOString()
+        //     .split("T")[0]
+        //     .replace(/-/g, "")
+        // : new Date().toISOString().split("T")[0].replace(/-/g, ""),
 
-            RequriedDate: new Date().toISOString().split("T")[0].replace(/-/g, ""),//formData.ReqDate
-              // ? new Date(formData.ReqDate)
-              //     .toISOString()
-              //     .split("T")[0]
-              //     .replace(/-/g, "")
-              // : new Date().toISOString().split("T")[0].replace(/-/g, ""),
-        
+        RequriedDate: formData.RequiredDate
+          ? new Date(formData.RequiredDate)
+              .toISOString()
+              .split("T")[0]
+              .replace(/-/g, "")
+          : new Date().toISOString().split("T")[0].replace(/-/g, ""),
 
-          //DocEntry: formData.DocEntry,
-          DocumentStatus: "open",
-          ContactPerson: formData.ContactPerson || "",
-          NumAtCard: formData.CustomerRefNo || "",
-          DocType: "dDocument_Items",
-         U_ReqCode: summaryData.RequestorCode || "",
+        DocTime: formData.RequisitionTime,
+        DocEntry: formData.DocEntry,
+        Comments: formData.Remarks,
+         U_MRNo: formData.docEntry,
+         U_OEM_UEMAIL:null,
+         U_OED_UID:null,
+        DocumentStatus: "open",
+        ContactPerson: formData.ContactPerson || "",
+        NumAtCard: formData.CustomerRefNo || "",
+        DocType: "dDocument_Items",
+        U_ReqCode: summaryData.RequestorCode || "",
         U_ReqName: summaryData.RequestorName,
-          DocumentLines: itemTabledata.map((line) => ({
-            ItemCode: line.ItemCode,
-            ItemDescription: line.ItemName,
-            Quantity: Number(line.quantity),
-            UnitPrice: Number(line.amount),
-            WarehouseCode: line.WarehouseCode,
-            ProjectCode: line.ProjectCode,
-            //TaxCode: line.TaxCode,
-            //VatGroup: line.TaxCode,
-            //DiscountPercent: Number(line.discount),
-            //LineTotal: Number(line.total),
-            RequiredDate: formData.ReqDate
-              ? new Date(formData.ReqDate)
-                  .toISOString()
-                  .split("T")[0]
-                  .replace(/-/g, "")
-              : new Date().toISOString().split("T")[0].replace(/-/g, ""),
-          })),
-
-         
-        };
-      console.log("formdatatosend", payload,grpopayload);
+         U_PrjCode: formData.ProjectCode || "",
+        U_PrjDesc: formData.ProjectName || "",
+        DocumentsOwner:selectedItemOwner,
+        DocumentLines: itemTabledata.map((line) => ({
+          ItemCode: line.ItemCode,
+          ItemDescription: line.ItemName,
+          U_HLB_FullDesc: line.fulldescription,
+          Quantity: Number(line.quantity),
+          UnitPrice: Number(line.amount),
+          WarehouseCode: line.WarehouseCode,
+          ProjectCode: line.ProjectCode,
+          UoMCode: line.UOMCode,
+          UoMEntry: line.UOMEntry,
+          U_HLB_Rmarks: line.remarks,
+          U_MRDocEntry: formData.docEntry,
+        U_MRDocNo: formData.docNum || "",
+        U_MRLine: line.BoqLineNum,
+          //TaxCode: line.TaxCode,
+          //VatGroup: line.TaxCode,
+          //DiscountPercent: Number(line.discount),
+          //LineTotal: Number(line.total),
+          RequiredDate: formData.ReqDate
+            ? new Date(formData.ReqDate)
+                .toISOString()
+                .split("T")[0]
+                .replace(/-/g, "")
+            : new Date().toISOString().split("T")[0].replace(/-/g, ""),
+        })),
+      };
+      console.log("formdatatosend", payload, grpopayload);
       const formDataToSend = new FormData();
-     
 
       formDataToSend.append(
         "DocumentLines",
         JSON.stringify(payload.DocumentLines),
       );
-      
+
       //formDataToSend.append("data", JSON.stringify(payload.data));
 
       Object.keys(payload).forEach((key) => {
-        if (
-          key !== "DocumentLines" 
-        ) {
+        if (key !== "DocumentLines") {
           formDataToSend.append(key, payload[key]);
         }
       });
       let res = [];
       if (formDetails[0]?.name === "Material Request") {
-        res=await dispatch(createMaterialRequest(payload)).unwrap();
+        res = await dispatch(createMaterialRequest(payload)).unwrap();
       } else if (formDetails[0]?.name === "GRPO") {
         res = await dispatch(createPurchaseDeliveryNotes(grpopayload)).unwrap();
       }
       console.log("reshandlesubmit", res);
 
       if (res.message === "Please Login!") {
-        navigate("/login");
+        // navigate("/login");
         return;
       }
       res && setApiError(null);
@@ -594,8 +649,8 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
     console.log("saveitemitem", item);
     // const newItems = Array.isArray(item) ? item.filter(i=>i.U_ItemCode!=="") : Object.values(item).filter(i=>i.U_ItemCode!==null);
     const newItems = Array.isArray(item)
-      ? item.filter((i) => i.U_ItemCode||i.ItemCode) // filters out null, "", undefined, 0, false
-      : Object.values(item).filter((i) => i.U_ItemCode||i.ItemCode);
+      ? item.filter((i) => i.U_ItemCode || i.ItemCode) // filters out null, "", undefined, 0, false
+      : Object.values(item).filter((i) => i.U_ItemCode || i.ItemCode);
 
     for (const newItem of newItems) {
       const itemresponse = await getItemPrice(
@@ -624,20 +679,20 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
             slno: index + 1,
             task: item.U_Task, // usually LineNum is 0-based
             BoqLineNum: item.LineId,
-            ItemCode: item.U_ItemCode||item.ItemCode,
-            ItemName: item.U_Desc||item.ItemDescription,
-            fulldescription: item.U_FullDesc||item.FullDescription,
-            quantity: item.U_PQty||item.Quantity,
-            amount: item.U_Rate||item.Price,
-            linetotal: item.U_PCost||item.LineTotal,
-            project: item.U_Project||item.ProjectCode,
-            warehouse: item.U_Whs||item.WarehouseCode,
-            uom: item.U_UOM||item.UoMCode,
+            ItemCode: item.U_ItemCode || item.ItemCode,
+            ItemName: item.U_Desc || item.ItemDescription,
+            fulldescription: item.U_FullDesc || item.FullDescription,
+            quantity: item.U_PQty || item.Quantity,
+            amount: item.U_Rate || item.Price,
+            linetotal: item.U_PCost || item.LineTotal,
+            project: item.U_Project || item.ProjectCode,
+            warehouse: item.U_Whs || item.WarehouseCode,
+            UOMCode: item.U_UOM || item.UOMCode,
             stage: item.U_Stage,
             issuedQty: item.U_AQty,
             inStock: item.U_InStock,
             availableQty: item.U_AQty,
-            rateTotal: item.U_RateTotal||item.Rate,
+            rateTotal: item.U_RateTotal || item.Rate,
             remarks: item.U_HLB_Rmarks,
           }));
 
@@ -650,8 +705,8 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
         });
         setIsCopyFromBOQ(false);
         setIsCopyFromPurchase(false);
-      }else if(isCopyFromPurchase){
-         console.log("isCopyFromBOQ", isCopyFromBOQ);
+      } else if (isCopyFromPurchase) {
+        console.log("isCopyFromBOQ", isCopyFromBOQ);
         setitemTableData((prev) => {
           setSummaryData((prevSummary) => ({
             ...prevSummary,
@@ -667,22 +722,23 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
             id: index,
             slno: index + 1,
             task: item.U_Task, // usually LineNum is 0-based
-            BoqLineNum: item.U_SQlineNum,
-            ItemCode:item.ItemCode,
-            ItemName:item.ItemDescription,
-            fulldescription: item.FullDescription,
+            BoqLineNum: item.U_SQlineNum || item.U_SQMRlinenum,
+            ItemCode: item.ItemCode,
+            ItemName: item.ItemDescription,
+            fulldescription: item.U_HLB_Description,
             quantity: item.Quantity,
             amount: item.Price,
             linetotal: item.LineTotal,
             project: item.ProjectCode,
             warehouse: item.WarehouseCode,
-            uom:item.UoMCode,
+            UOMEntry: item.UoMEntry,
+            UOMCode: item.UoMCode,
             stage: item.U_Stage,
             issuedQty: item.U_AQty,
             inStock: item.U_InStock,
             availableQty: item.U_AQty,
-            rateTotal:item.Rate,
-            remarks: item.U_HLB_Rmarks,
+            rateTotal: item.Rate,
+            remarks: item.U_HLB_Rmarks || item.Comments,
           }));
 
           const existingIds = new Set(prev.map((row) => row.id));
@@ -1027,7 +1083,7 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
             onSubmit={handleSubmit}
             setFormData={setFormData}
             formData={formData}
-            formName={"Material Request"}
+            formName={formDetails[0]?.name}
             mode={"create"}
             pageId={id}
             selectedcardcode={selectedcardcode}
@@ -1076,7 +1132,7 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
               itemdata={itemdata}
               setitemData={setitemData}
               formData={formData}
-              formName={"Material Request"}
+              formName={formDetails[0]?.name}
               setitemTableData={setitemTableData}
               itemTabledata={itemTabledata}
               summaryData={summaryData}
@@ -1136,13 +1192,14 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
         originalporequestList={originalporequestList}
         setOriginalporequestlist={setOriginalporequestlist}
         saveItem={saveItem}
-         inputValue={inputValue}
+        inputValue={inputValue}
         setInputValue={setInputValue}
         saveService={saveService}
         type={type}
         setType={setType}
       />
       <BOQListDialog
+      setSQDocNum={setSQDocNum}
         open={isBoqListopem}
         setOpen={setisBoqListopem}
         boqrequestList={boqrequestList}
@@ -1190,7 +1247,9 @@ let grpopayload={CardCode: formData.CardCode || selectedcardcode,
           <Button
             design="Emphasized"
             onClick={() => {
-              apiError ? setOpen(false) : navigate(`/Contracting-Management/${formId}`);
+              apiError
+                ? setOpen(false)
+                : navigate(`/Contracting-Management/${formId}`);
             }}
           >
             OK

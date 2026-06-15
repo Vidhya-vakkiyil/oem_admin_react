@@ -25,6 +25,7 @@ const BOQListDialog = (props) => {
     inputValue,
     setBoqRequestList,
     setInputValue,
+    setSQDocNum
   } = props;
   const [rowSelection, setRowSelection] = useState([]);
   const [openListBOQItem, setOpenListBOQItem] = useState(false);
@@ -151,6 +152,7 @@ console.log("filteredList", filteredList);
                 //setOpen(false);
                 console.log("rowselectionsave", rowSelection);
                 setOpenListBOQItem(true);
+                setSQDocNum(Object.values(rowSelection).DocEntry)
                 setSelectedBOQList(
                   Object.values(rowSelection).flatMap(
                     (req) => req.HLB_BOQT1Collection || [],

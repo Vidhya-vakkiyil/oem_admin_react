@@ -60,81 +60,104 @@ const UserDashboard = () => {
   const uniqueMenus = useMemo(() => {
     return [...new Set(allMenus)];
   }, [allMenus]);
-  
-   useEffect(() => {
-      const fetchData = async () => {
-        try {
-          if (uniqueMenus.includes("Purchase Request")) {
-          
-           await dispatch(
-              fetchPurchaseRequest({
-                top: 100,
-                skip: 0,
-              }),
-            ).unwrap();
-          
-        }
-         
-            await dispatch(
-              fetchPurchaseDeliveryNotes({
-                top: 100,
-                skip: 0,
-              }),
-            ).unwrap();
-       
 
-         
-            await dispatch(
-              fetchMaterialRequest({
-                top: 100,
-                skip: 0,
-              }),
-            ).unwrap();
-       
-        } catch (err) {
-          console.log("Failed to fetch user", err.message);
-          //setApiError(err.message);
-         // err.message && navigate("/");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (uniqueMenus.includes("Purchase Request")) {
+          await dispatch(
+            fetchPurchaseRequest({
+              top: 100,
+              skip: 0,
+            }),
+          ).unwrap();
         }
-      };
-      fetchData();
-    }, [dispatch]);
-useEffect(() => {
+
+        await dispatch(
+          fetchPurchaseDeliveryNotes({
+            top: 100,
+            skip: 0,
+          }),
+        ).unwrap();
+
+        await dispatch(
+          fetchMaterialRequest({
+            top: 100,
+            skip: 0,
+          }),
+        ).unwrap();
+      } catch (err) {
+        console.log("Failed to fetch user", err.message);
+        //setApiError(err.message);
+        // err.message && navigate("/");
+      }
+    };
+    fetchData();
+  }, [dispatch]);
+  useEffect(() => {
     const projectData = allProjects.map((project) => {
       const projectRequests = requests.filter(
-        (req) => req.U_PrjCode === project.Code
+        (req) => req.U_PrjCode === project.Code,
       );
       const projectDeliveryNotes = deliveryNotes.filter(
-        (note) => note.U_PrjCode === project.Code
+        (note) => note.U_PrjCode === project.Code,
       );
-    const projectMaterialRequests = materialRequest.filter(
-      (mr) => mr.U_PrjCode === project.Code
-    ); // Replace with actual material requests when available
-    console.log("materialRequest",projectRequests,projectDeliveryNotes,projectMaterialRequests);
+      const projectMaterialRequests = materialRequest.filter(
+        (mr) => mr.U_PrjCode === project.Code,
+      ); // Replace with actual material requests when available
+      console.log(
+        "materialRequest",
+        projectRequests,
+        projectDeliveryNotes,
+        projectMaterialRequests,
+      );
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      const projectDocuments = [
+        ...projectRequests,
+        ...projectDeliveryNotes,
+        ...projectMaterialRequests,
+      ];
+
+      monthly: months.map((month, index) => ({
+        month,
+        amount: projectDocuments.filter((doc) => {
+          const date = doc.createdAt || doc.DocDate || doc.CreateDate;
+
+          return date && new Date(date).getMonth() === index;
+        }).length,
+      }));
       return {
         projectCode: project.Code,
         projectName: project.Name,
         "Purchase Request": projectRequests.length,
         GRPO: projectDeliveryNotes.length,
         "Material Request": projectMaterialRequests.length,
-        monthly: [
-          { month: "Jan", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 0).length },
-          { month: "Feb", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 1).length },
-          { month: "Mar", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 2).length },
-          { month: "Apr", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 3).length },
-          { month: "May", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 4).length },
-          { month: "Jun", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 5).length },
-          { month: "Jul", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 6).length },
-          { month: "Aug", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 7).length },
-          { month: "Sep", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 8).length },
-          { month: "Oct", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 9).length },
-          { month: "Nov", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 10).length },
-          { month: "Dec", amount: projectRequests.filter(req => new Date(req.createdAt).getMonth() === 11).length },
-        ],
+        monthly: months.map((month, index) => ({
+          month,
+          amount: projectDocuments.filter((doc) => {
+            const date = doc.createdAt || doc.DocDate || doc.CreateDate;
+
+            return date && new Date(date).getMonth() === index;
+          }).length,
+        })),
       };
     });
     setDashboardData(projectData);
-  }, [allProjects, requests, deliveryNotes,materialRequest]);
+  }, [allProjects, requests, deliveryNotes, materialRequest]);
   useEffect(() => {
     if (dashboardData.length > 0) {
       setSelectedProject(dashboardData[0]);
@@ -181,8 +204,7 @@ useEffect(() => {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))",
             gap: "1rem",
-                paddingLeft: "20px",
-
+            paddingLeft: "20px",
           }}
         >
           {dashboardData.map((project, index) => (
@@ -207,7 +229,7 @@ useEffect(() => {
                 }}
               >
                 <FlexBox justifyContent="SpaceBetween" alignItems="Center">
-                  <div style={{maxHeight:"50px"}}>
+                  <div style={{ maxHeight: "50px" }}>
                     <Title level="H4" style={{ color: "white" }}>
                       {project.projectName}
                     </Title>
@@ -237,9 +259,8 @@ useEffect(() => {
         </div>
 
         {/* Charts */}
-       {selectedProject && (
+        {selectedProject && (
           <>
-           
             <div
               style={{
                 display: "grid",
@@ -328,7 +349,7 @@ useEffect(() => {
               </Card>
             </div>
           </>
-        )} 
+        )}
       </div>
     </Page>
   );

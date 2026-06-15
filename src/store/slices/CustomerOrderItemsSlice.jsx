@@ -7,12 +7,19 @@ export const fetchOrderItems = createAsyncThunk(
   "orderItems/fetchOrderItems",
   async (_, thunkApi) => {
     try {
-      const response = await api.get(API_URL, { withCredentials: true });
+      const response = await api.get(`${API_URL}`, { withCredentials: true ,timeout: 30000});
+      console.log("fetchorderitemresponse",response.data)
       return response.data;
+      
     } catch (error) {
-      return thunkApi.rejectWithValue(
-        error.response?.data || "Error fetching orderItems"
-      );
+      console.log("API Error", error);
+      console.log("Status", error.response?.status);
+      console.log("Data", error.response?.data);
+
+      return thunkApi.rejectWithValue({
+        status: error.response?.status,
+        message: error.response?.data?.message || error.message,
+      });
     }
   }
 );

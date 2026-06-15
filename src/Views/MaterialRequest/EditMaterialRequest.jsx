@@ -98,7 +98,7 @@ const EditMaterialRequest = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { orderItems } = useSelector((state) => state.orderItems);
-  const {userList} = useSelector((state) => state.materialRequests);
+  const { userList } = useSelector((state) => state.materialRequests);
   const [apiError, setApiError] = useState(null);
   const user = useSelector((state) => state.auth.user);
   const [open, setOpen] = useState(false);
@@ -126,12 +126,15 @@ const EditMaterialRequest = () => {
   const [selectedItemOwner, setSelectedItemOwner] = useState("");
   const [selectedServiceOwner, setSelectedServiceOwner] = useState("");
   const [selectedPurRequestList, setSelectedPurRequestList] = useState([]);
-  const [originalSelectedPurRequestList, setOriginalSelectedPurRequestList] = useState([]);
+    const [SQDocNum,setSQDocNum]=useState("");
+  
+  const [originalSelectedPurRequestList, setOriginalSelectedPurRequestList] =
+    useState([]);
 
   const [currencyType, setCurrencyType] = useState("GBP");
 
   const [dimensionData, setDimensionData] = useState([]);
- const [originalboqrequestList,setOriginalboqrequestlist] = useState([]);
+  const [originalboqrequestList, setOriginalboqrequestlist] = useState([]);
   const [inputValue, setInputValue] = useState({});
   const [itemdata, setitemData] = useState([
     {
@@ -195,13 +198,13 @@ const EditMaterialRequest = () => {
   const [isBoqListopem, setisBoqListopem] = useState(false);
   const [boqrequestList, setBoqRequestList] = useState([]);
   const [refreshdata, setRefreshData] = useState([]);
-  const [openPurRequestItemsDialog, setOpenPurRequestItemsDialog] = useState(false);
-  
-   const [selectedSectionId, setSelectedSectionId] =
-    useState("section1");
+  const [openPurRequestItemsDialog, setOpenPurRequestItemsDialog] =
+    useState(false);
 
-  const goodsIssue = async()=>{
-      const tabledata = itemTabledata;
+  const [selectedSectionId, setSelectedSectionId] = useState("section1");
+
+  const goodsIssue = async () => {
+    const tabledata = itemTabledata;
     const data = {
       ...formData,
       ...tabledata,
@@ -219,13 +222,15 @@ const EditMaterialRequest = () => {
       "attachment",
       oldAttachmentFiles,
     );
-    let cloneFOrmData = { 
+    let cloneFOrmData = {
       ...data,
       formData: formData,
       copyFrom: formDetails[0]?.name,
       DocumentLines: tabledata.filter(
-            (item) =>item.ItemCode && Number(item.quantity || 0) <= Number(item.availableQty || 0),
-          ),
+        (item) =>
+          item.ItemCode &&
+          Number(item.quantity || 0) <= Number(item.availableQty || 0),
+      ),
       summaryData: summaryData,
       DocType: "dDocument_Items",
       Remark: summaryData.Remark,
@@ -244,53 +249,55 @@ const EditMaterialRequest = () => {
         state: { copyFormData: cloneFOrmData, formname: "Goods Issue" },
       },
     );
+  };
+  const refreshStock = async () => {
+    try {
+      setLoading(true);
+      const data = {
+        U_BPCode: formData.CusCode || null,
+        U_PrjCode: formData.ProjectCode || null,
+      };
+      const res = await dispatch(fetchBOQList(data)).unwrap();
 
-  }
-const refreshStock = async () => {
-  try {
-    setLoading(true);
- const data={ U_BPCode: formData.CusCode||null, 
-      U_PrjCode:formData.ProjectCode||null }
-    const res = await dispatch(fetchBOQList(data)).unwrap();
+      const currentItemValues = itemTabledata.map((item) => ({
+        ItemCode: item.ItemCode,
+        quantity: item.quantity, // ✅ FIX: include quantity
+        warehouse: item.warehouse,
+      }));
 
-    const currentItemValues = itemTabledata.map((item) => ({
-      ItemCode: item.ItemCode,
-      quantity: item.quantity, // ✅ FIX: include quantity
-      warehouse: item.warehouse,
-    }));
+      console.log("refreshstock", res, currentItemValues);
 
-    console.log("refreshstock", res, currentItemValues);
+      const boqItems = res.flatMap(
+        (boqlist) => boqlist.HLB_BOQT1Collection || [],
+      );
 
-    const boqItems = res.flatMap(
-      (boqlist) => boqlist.HLB_BOQT1Collection || [],
-    );
+      setitemTableData((prev) => {
+        return prev.map((row) => {
+          const matchedCurrent = currentItemValues.find(
+            (line) => line.ItemCode === row.ItemCode,
+          );
 
-    setitemTableData((prev) => {
-      return prev.map((row) => {
-        const matchedCurrent = currentItemValues.find(
-          (line) => line.ItemCode === row.ItemCode,
-        );
-
-        return {
-          ...row,
-          quantity: matchedCurrent?.quantity ?? row.quantity ?? 0,
-        };
+          return {
+            ...row,
+            quantity: matchedCurrent?.quantity ?? row.quantity ?? 0,
+          };
+        });
       });
-    });
-  } catch (error) {
-    console.error("refreshStock error:", error);
-  } finally {
-    setLoading(false);
-  }
-};
-    
+    } catch (error) {
+      console.error("refreshStock error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openBoqList = async () => {
     console.log("openBoqList");
-    setSelectedSectionId("section2")
+    setSelectedSectionId("section2");
     setIsCopyFromBOQ(true);
-     const data={ U_BPCode: formData.CusCode||null, 
-      U_PrjCode:formData.ProjectCode||null }
+    const data = {
+      U_BPCode: formData.CusCode || null,
+      U_PrjCode: formData.ProjectCode || null,
+    };
     const res = await dispatch(fetchBOQList(data)).unwrap();
     const currentType =
       type === "Item" ? "dDocument_Items" : "dDocument_Service";
@@ -301,18 +308,26 @@ const refreshStock = async () => {
     console.log("currentType", currentType, res?.data);
     setisBoqListopem(true);
   };
-  const openPurRequestItems=async()=>{
-      setOpenPurRequestItemsDialog(true);
-      console.log("openPurRequestItems",itemTabledata)
-      setSelectedPurRequestList( itemTabledata.filter(
-            (item) =>item.ItemCode && Number(item.quantity || 0) >= Number(item.availableQty || 0),
-          ));
-          setOriginalSelectedPurRequestList( itemTabledata.filter(
-            (item) =>item.ItemCode && Number(item.quantity || 0) >= Number(item.availableQty || 0),
-          ));
-  }
+  const openPurRequestItems = async () => {
+    setOpenPurRequestItemsDialog(true);
+    console.log("openPurRequestItems", itemTabledata);
+    setSelectedPurRequestList(
+      itemTabledata.filter(
+        (item) =>
+          item.ItemCode &&
+          Number(item.quantity || 0) >= Number(item.availableQty || 0),
+      ),
+    );
+    setOriginalSelectedPurRequestList(
+      itemTabledata.filter(
+        (item) =>
+          item.ItemCode &&
+          Number(item.quantity || 0) >= Number(item.availableQty || 0),
+      ),
+    );
+  };
   const submitPurchaseRequest = async (selectedRow) => {
-    console.log("selectedRow",selectedRow)
+    console.log("selectedRow", selectedRow);
     const tabledata = Object.values(selectedRow) || [];
     const data = {
       ...formData,
@@ -331,13 +346,15 @@ const refreshStock = async () => {
       "attachment",
       oldAttachmentFiles,
     );
-    let cloneFOrmData = { 
+    let cloneFOrmData = {
       ...data,
       formData: formData,
       copyFrom: formDetails[0]?.name,
       DocumentLines: tabledata.filter(
-            (item) =>item.ItemCode && Number(item.quantity || 0) >= Number(item.availableQty || 0),
-          ),
+        (item) =>
+          item.ItemCode &&
+          Number(item.quantity || 0) >= Number(item.availableQty || 0),
+      ),
       summaryData: summaryData,
       DocType: "dDocument_Items",
       Remark: summaryData.Remark,
@@ -385,8 +402,9 @@ const refreshStock = async () => {
   };
   const saveItem = async (item) => {
     console.log("saveitemitem", item);
-       const newItems = Array.isArray(item) ? item.filter(i=>i.U_ItemCode!==null) : Object.values(item).filter(i=>i.U_ItemCode!==null);
-
+    const newItems = Array.isArray(item)
+      ? item.filter((i) => i.U_ItemCode !== null)
+      : Object.values(item).filter((i) => i.U_ItemCode !== null);
 
     for (const newItem of newItems) {
       const itemresponse = await getItemPrice(
@@ -420,7 +438,7 @@ const refreshStock = async () => {
             linetotal: item.U_PCost,
             project: item.U_Project,
             warehouse: item.U_Whs,
-            uom: item.U_UOM,
+            uom: item.UOMCode,
             stage: item.U_Stage,
             issuedQty: item.U_AQty,
             inStock: item.U_InStock,
@@ -530,17 +548,15 @@ const refreshStock = async () => {
   useEffect(() => {
     if (!formDetails || formDetails.length === 0) return;
     if (!formDetails[0]?.name) return;
-console.log("formDetails",formDetails[0]?.name)
+    console.log("formDetails", formDetails[0]?.name);
     const fetchData = async () => {
       setLoading(true);
 
       try {
-        let orderListById =[];
-        if(formDetails[0]?.name === "Material Request"){
-         orderListById = await dispatch(
-          fetchMaterialRequestById(id),
-        ).unwrap();
-      }else if(formDetails[0]?.name === "GRPO"){  
+        let orderListById = [];
+        if (formDetails[0]?.name === "Material Request") {
+          orderListById = await dispatch(fetchMaterialRequestById(id)).unwrap();
+        } else if (formDetails[0]?.name === "GRPO") {
           orderListById = await dispatch(
             fetchPurchaseDeliveryNotesById(id),
           ).unwrap();
@@ -561,7 +577,7 @@ console.log("formDetails",formDetails[0]?.name)
             RequisitionDate: orderListById.U_DocDate || "",
             RequisitionTime: orderListById.U_ReqTime || "",
             RequiredDate: orderListById.U_ReqDate || "",
-            CusCode: orderListById.U_CardCode,
+            CusCode: orderListById.U_CardCode,            
             ProjectCode: orderListById.U_PrjCode,
             ProjectName: orderListById.U_PrjDesc,
             Remarks: orderListById.U_Remark,
@@ -584,14 +600,15 @@ console.log("formDetails",formDetails[0]?.name)
                       ? {
                           task: matched.U_Task, // usually LineNum is 0-based
                           BoqLineNum: matched.U_SQlineNum,
-                          LineId:matched.LineId,
+                          LineId: matched.LineId,
                           ItemCode: matched.U_ItmSerCode,
-                          ItemName: matched.U_Desc,
-                          fulldescription: matched.U_ItemDesc,
+                          ItemName: matched.U_ItemDesc,
+                          fulldescription: matched.U_SerDesc,
                           quantity: matched.U_ReqQty,
                           amount: matched.U_UnitPrice,
                           linetotal: matched.U_LineTotal,
                           project: matched.U_Project,
+                          UOMCode: matched.U_UOM,
                           warehouse: matched.U_Whs,
                           uom: matched.U_UOM,
                           stage: matched.U_Stage,
@@ -604,14 +621,15 @@ console.log("formDetails",formDetails[0]?.name)
                       : {
                           task: item.U_Task, // usually LineNum is 0-based
                           BoqLineNum: item.U_SQlineNum,
-                          LineId:item.LineId,
+                          LineId: item.LineId,
                           ItemCode: item.U_ItmSerCode,
-                          ItemName: item.U_ItemType,
-                          fulldescription: item.U_ItemDesc,
+                           ItemName: item.U_ItemDesc,
+                          fulldescription: item.U_SerDesc,
                           quantity: item.U_ReqQty,
                           amount: item.U_UnitPrice,
                           linetotal: item.U_LineTotal,
                           project: item.U_Project,
+                          UOMCode: item.U_UOM,
                           warehouse: item.U_Whs,
                           uom: item.U_UOM,
                           stage: item.U_Stage,
@@ -636,16 +654,16 @@ console.log("formDetails",formDetails[0]?.name)
                       ? {
                           task: matched.U_Task, // usually LineNum is 0-based
                           BoqLineNum: matched.U_SQlineNum,
-                          LineId:matched.LineId,
+                          LineId: matched.LineId,
                           ItemCode: matched.U_ItmSerCode,
-                          ItemName: matched.U_ItemType,
-                          fulldescription: matched.U_ItemDesc,
+                           ItemName: matched.U_ItemDesc,
+                          fulldescription: matched.U_SerDesc,
                           quantity: matched.U_ReqQty,
                           amount: matched.U_UnitPrice,
                           linetotal: matched.U_LineTotal,
+                          UOMCode: orderListById.U_UOM,
                           project: matched.U_Project,
                           warehouse: matched.U_Whs,
-                          uom: matched.U_UOM,
                           stage: matched.U_Stage,
                           issuedQty: matched.U_IssuedQty,
                           inStock: matched.U_InStock,
@@ -656,16 +674,16 @@ console.log("formDetails",formDetails[0]?.name)
                       : {
                           task: item.U_Task, // usually LineNum is 0-based
                           BoqLineNum: item.U_SQlineNum,
-                          LineId:item.LineId,
+                          LineId: item.LineId,
                           ItemCode: item.U_ItmSerCode,
-                          ItemName: item.U_ItemType,
-                          fulldescription: item.U_ItemDesc,
+                          ItemName: item.U_ItemDesc,
+                          fulldescription: item.U_SerDesc,
                           quantity: item.U_ReqQty,
                           amount: item.U_UnitPrice,
                           linetotal: item.U_LineTotal,
                           project: item.U_Project,
+                          UOMCode: item.U_UOM,
                           warehouse: item.U_Whs,
-                          uom: item.U_UOM,
                           stage: item.U_Stage,
                           issuedQty: item.U_IssuedQty,
                           inStock: item.U_InStock,
@@ -681,16 +699,16 @@ console.log("formDetails",formDetails[0]?.name)
               orderListById.HLB_MRQ1Collection.map((item, index) => ({
                 task: item.U_Task, // usually LineNum is 0-based
                 BoqLineNum: item.U_SQlineNum,
-                LineId:item.LineId,
+                LineId: item.LineId,
                 ItemCode: item.U_ItmSerCode,
-                ItemName: item.U_ItemType,
-                fulldescription: item.U_ItemDesc,
+                 ItemName: item.U_ItemDesc,
+                          fulldescription: item.U_SerDesc,
                 quantity: item.U_ReqQty,
                 amount: item.U_UnitPrice,
                 linetotal: item.U_LineTotal,
                 project: item.U_Project,
+                UOMCode: item.U_UOM,
                 warehouse: item.U_Whs,
-                uom: item.U_UOM,
                 stage: item.U_Stage,
                 issuedQty: item.U_IssuedQty,
                 inStock: item.U_InStock,
@@ -721,16 +739,16 @@ console.log("formDetails",formDetails[0]?.name)
               "formData",
               formData,
             );
-
             // 3. Preselect rows
           }
           setSummaryData((prev) => ({
             ...prev,
-            RequestorCode: orderListById.U_ReqCode,
-              InternalKey:String(userList.find(u=>u.UserName === orderListById.U_ReqName)?.InternalKey || ""),
+            RequestorCode: orderListById.U_ReqType,
+            
+            UserCode:orderListById.U_ReqCode,
             RequestorName: orderListById.U_ReqName,
-            eMail:orderListById.eMail,
-            Department: orderListById.U_Dept,
+            eMail: orderListById.eMail,
+            Department: orderListById.U_Dept, 
             DocTotal: orderListById.DocTotal,
             ApprovalStatus: orderListById.U_AppStatus,
             ApprovedBy: orderListById.U_AppByName,
@@ -866,7 +884,9 @@ console.log("formDetails",formDetails[0]?.name)
               Quantity: Number(line.quantity || 0),
               UnitPrice: Number(line.amount || 0),
               WarehouseCode: line.warehouse || "",
-              //ProjectCode: line.project || "",
+              ProjectCode: line.project || "",
+              UoMEntry: line.UOMEntry || null,
+            UoMCode: line.UOMCode,
               TaxCode: line.TaxCode || "",
               VatGroup: line.TaxCode || "",
               DiscountPercent: Number(line.discount || 0),
@@ -1002,28 +1022,34 @@ console.log("formDetails",formDetails[0]?.name)
           : new Date().toISOString().split("T")[0].replace(/-/g, ""),
         U_ReqTime: formData.RequisitionTime,
         U_CardCode: formData.CusCode || "",
+        U_CardName: formData.CusName || "",
         U_PrjCode: formData.ProjectCode || "",
         U_PrjDesc: formData.ProjectName || "",
         U_Remark: formData.Remarks || "",
-        U_ReqType: "U",
-        U_ReqCode: summaryData.RequestorCode || "",
+        U_ReqType: summaryData.RequestorCode,
+        U_ReqCode: summaryData.UserCode || "",
         U_ReqName: summaryData.RequestorName,
         U_Dept: summaryData.Department || "",
         U_DocTotal: summaryData.DocTotal || 0,
+        U_SQDocNum:SQDocNum,
         HLB_MRQ1Collection: filteredData.map((item) => ({
-          LineId:item.LineId,
+          LineId: item.LineId,
           U_ItmSerCode: item.ItemCode,
           U_ItemDesc: item.ItemName,
+          U_SerDesc: item.fulldescription,
+
           U_ReqQty: item.quantity || 0,
-          U_UOM: item.UOM,
           U_InStock: item.inStock || 0,
           U_Project: item.project || "",
+          UoMEntry: item.UOMEntry || null,
+            U_UOM: item.UOMCode,
           U_Stage: item.stage || "",
           U_UnitPrice: item.amount || 0,
           U_LineTotal: item.quantity * item.amount || 0,
           U_AvlQty: item.availableQty || 0,
           U_Whs: item.warehouse || "",
           U_SQlineNum: item.BoqLineNum || "",
+           U_HLB_Rmarks:item.remarks,
         })),
       };
 
@@ -1145,20 +1171,25 @@ console.log("formDetails",formDetails[0]?.name)
                     Refresh Stock
                   </Button>
 
-                  <Button design="Default" disabled={ !formData.CusCode && !formData.ProjectCode} onClick={openBoqList}>
-                  Copy From BOM
+                  <Button
+                    design="Default"
+                    disabled={!formData.CusCode && !formData.ProjectCode}
+                    onClick={openBoqList}
+                  >
+                    Copy From BOM
                   </Button>
 
                   <Button
                     design="Default"
-                    onClick={() =>{ openPurRequestItems()}}
+                    onClick={() => {
+                      openPurRequestItems();
+                    }}
                   >
                     Purchase Request
                   </Button>
-                    <Button design="Default" onClick={() => goodsIssue()}>
+                  <Button design="Default" onClick={() => goodsIssue()}>
                     Goods Issue
                   </Button>
-                 
                 </FlexBox>
               }
               endContent={
@@ -1168,7 +1199,9 @@ console.log("formDetails",formDetails[0]?.name)
                   </Button>
                   <Button
                     design="default"
-                    onClick={() => navigate(`/Contracting-Management/${formId}`)}
+                    onClick={() =>
+                      navigate(`/Contracting-Management/${formId}`)
+                    }
                   >
                     Cancel
                   </Button>
@@ -1231,7 +1264,7 @@ console.log("formDetails",formDetails[0]?.name)
           onPinButtonToggle={function Xs() {}}
           onSelectedSectionChange={function Xs() {}}
           onToggleHeaderArea={function Xs() {}}
-           selectedSectionId={selectedSectionId}
+          selectedSectionId={selectedSectionId}
           style={{
             maxHeight: "90vh",
           }}
@@ -1256,7 +1289,9 @@ console.log("formDetails",formDetails[0]?.name)
                     <BreadcrumbsItem data-route="/dashboard">
                       Home
                     </BreadcrumbsItem>
-                    <BreadcrumbsItem data-route={`/Contracting-Management/${formId}`}>
+                    <BreadcrumbsItem
+                      data-route={`/Contracting-Management/${formId}`}
+                    >
                       {formDetails
                         ? formDetails[0]?.name + " List"
                         : "Contracting Management"}
@@ -1302,7 +1337,7 @@ console.log("formDetails",formDetails[0]?.name)
                 defaultValues={formData} // ✅ now passes edit data properly
                 formDetails={formDetails}
                 pageId={id}
-                formName={"Material Request"}
+                formName={formDetails[0]?.name}
                 selectedcardcode={selectedcardcode}
                 setSelectedCardCode={setSelectedCardCode}
                 setCurrencyType={setCurrencyType}
@@ -1325,7 +1360,7 @@ console.log("formDetails",formDetails[0]?.name)
               setRowSelection={setRowSelection}
               itemdata={itemdata}
               setitemData={setitemData}
-              formName={"Material Request"}
+              formName={formDetails[0]?.name}
               formData={formData}
               setitemTableData={setitemTableData}
               itemTabledata={itemTabledata}
@@ -1384,6 +1419,7 @@ console.log("formDetails",formDetails[0]?.name)
         setType={setType}
       />
       <BOQListDialog
+      setSQDocNum={setSQDocNum}
         open={isBoqListopem}
         setOpen={setisBoqListopem}
         boqrequestList={boqrequestList}
@@ -1391,11 +1427,11 @@ console.log("formDetails",formDetails[0]?.name)
         saveService={saveService}
         type={type}
         setType={setType}
-         setBoqRequestList={setBoqRequestList}
-         originalboqrequestList={originalboqrequestList}
-  setOriginalboqrequestlist={setOriginalboqrequestlist}
-  inputValue={inputValue}
-  setInputValue={setInputValue}
+        setBoqRequestList={setBoqRequestList}
+        originalboqrequestList={originalboqrequestList}
+        setOriginalboqrequestlist={setOriginalboqrequestlist}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
       />
       <OpenPurRequestItemsDialog
         open={openPurRequestItemsDialog}
@@ -1407,10 +1443,10 @@ console.log("formDetails",formDetails[0]?.name)
         setType={setType}
         submitPurchaseRequest={submitPurchaseRequest}
         setSelectedPurRequestList={setSelectedPurRequestList}
-         originalSelectedPurRequestList={originalSelectedPurRequestList}
-  setOriginalSelectedPurRequestList={setOriginalSelectedPurRequestList}
-  inputValue={inputValue}
-  setInputValue={setInputValue}
+        originalSelectedPurRequestList={originalSelectedPurRequestList}
+        setOriginalSelectedPurRequestList={setOriginalSelectedPurRequestList}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
       />
       <Dialog open={open} onAfterClose={() => setOpen(false)}>
         <div
@@ -1450,7 +1486,9 @@ console.log("formDetails",formDetails[0]?.name)
           <Button
             design="Emphasized"
             onClick={() => {
-              apiError ? setOpen(false) : navigate(`/Contracting-Management/${formId}`);
+              apiError
+                ? setOpen(false)
+                : navigate(`/Contracting-Management/${formId}`);
               setOpen(false);
             }}
           >

@@ -1,4 +1,11 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  use,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FormConfigContext } from "../../../Components/Context/FormConfigContext";
 import {
   AnalyticalTable,
@@ -54,7 +61,10 @@ import {
   fetchitemprices,
   fetchEmployees,
 } from "../../../store/slices/salesAdditionalDetailsSlice";
-import { fetchDepartmentsList, fetchUsersList } from "../../../store/slices/materialRequestSlice";
+import {
+  fetchDepartmentsList,
+  fetchUsersList,
+} from "../../../store/slices/materialRequestSlice";
 
 const Contents = (props) => {
   const {
@@ -119,8 +129,7 @@ const Contents = (props) => {
   const tableRef = useRef();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-     const {user} = useSelector((state) => state.auth);
-  
+  const { user } = useSelector((state) => state.auth);
 
   const placeholderRows = Array(5).fill({
     ItemCode: "Loading...",
@@ -133,10 +142,13 @@ const Contents = (props) => {
   const [addServiceDialogOpen, setAddServicedialogOpen] = useState(false);
   const [taxData, setTaxData] = useState([]);
   const [projectData, setProjectData] = useState([]);
+  const [UOMData, setUOMData] = useState([]);
+  const [originalUOMData, setOriginalUOMData] = useState([]);
+
   const [warehouseData, setWarehouseData] = useState([]);
-  const [userList,setUserList]=useState([]);
-  const [employeeList,setEmployeeList]=useState([]);
-  const [departmentList,setDepartmentList]=useState([]);
+  const [userList, setUserList] = useState([]);
+  const [employeeList, setEmployeeList] = useState([]);
+  const [departmentList, setDepartmentList] = useState([]);
   const [OwnerList, setOwnerList] = useState([]);
   const [profitCenterData, setProfitCenterData] = useState([]);
   const [freightData, setFreightData] = useState([]);
@@ -173,7 +185,9 @@ const Contents = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await dispatch(fetchOrderItems()).unwrap();
+        let res = [];
+        res = await dispatch(fetchOrderItems()).unwrap();
+        console.log("fetchdata", formDetails);
         let taxCode = [];
         if (
           (formDetails && formDetails[0]?.name === "Sales Order") ||
@@ -196,12 +210,16 @@ const Contents = (props) => {
         setUserList(users);
         setSummaryData((prev) => ({
           ...prev,
-          RequestorName: summaryData.RequestorName?summaryData.RequestorName:String(users && users[0]?.UserName) ,
-          eMail:summaryData.eMail?summaryData.eMail:String(users && users[0]?.eMail)
+          RequestorName: summaryData.RequestorName
+            ? summaryData.RequestorName
+            : String(users && users[0]?.UserName),
+          eMail: summaryData.eMail
+            ? summaryData.eMail
+            : String(users && users[0]?.eMail),
         }));
-        console.log("usersfetchdata",users)
+        console.log("usersfetchdata", users);
 
-        const employeeList =await dispatch(fetchEmployees()).unwrap();
+        const employeeList = await dispatch(fetchEmployees()).unwrap();
         setEmployeeList(employeeList);
 
         const departmentList = await dispatch(fetchDepartmentsList()).unwrap();
@@ -213,6 +231,12 @@ const Contents = (props) => {
 
         setProjectData(user.Projects);
         setOriginalProjectData(user.Projects);
+
+        const uomItem = res?.value?.flatMap((item) => item?.OEM?.UOM || []);
+
+        console.log("uomItem", uomItem);
+        setUOMData(uomItem);
+        setOriginalUOMData(uomItem);
 
         const profitCenterData = await dispatch(
           fetchProfitCenterDetails(),
@@ -873,6 +897,10 @@ const Contents = (props) => {
                         setProjectData={setProjectData}
                         originalProjectData={originalProjectData}
                         setOriginalProjectData={setOriginalProjectData}
+                        UOMData={UOMData}
+                        setUOMData={setUOMData}
+                        originalUOMData={originalUOMData}
+                        setOriginalUOMData={setOriginalUOMData}
                         originalWarehouseData={originalWarehouseData}
                         setOriginalWarehouseData={setOriginalWarehouseData}
                         selectedItemOwner={selectedItemOwner}

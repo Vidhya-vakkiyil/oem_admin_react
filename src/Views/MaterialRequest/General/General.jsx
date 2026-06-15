@@ -418,9 +418,9 @@ const General = ({
                     minWidth: "250px",
                     gap: "8px",
                   }}
-                >
+                >{console.log("first",formName,location)}
                   {" "}
-                  {formName !== "Goods Issue" && (
+                  {formName !== "Goods Issue" &&formName !== "Purchase Request" &&location!=="Purchase Request" && (
                     <FlexBox alignItems="Center">
                       {formDetails[0]?.name === "GRPO"||location==="GRPO"?<Label style={{ minWidth: "200px" }}>
                         Vendor code:
@@ -461,7 +461,7 @@ const General = ({
                       />
                     </FlexBox>
                   )}
-                  {formName !== "Goods Issue" && (
+                  {formName !== "Goods Issue" && formName !== "Purchase Request" &&location!=="Purchase Request" &&(
                     <FlexBox alignItems="Center">
                        {formDetails[0]?.name === "GRPO"||location==="GRPO"?<Label style={{ minWidth: "200px" }}>
                         Vendor Name:
@@ -617,13 +617,13 @@ const General = ({
         inputValue={inputValue}
         setInputValue={setInputValue}
         
-        // setSelectedCard={(card) => {
-        //   setSelectedCard(card);
-        //   setValue("CardCode", card.CardCode); // update RHF field
-        //   setValue("CardName", card.CardName); // fill another field automatically
-        //   setValue("ContactPerson", card.ContactPerson);
-        //   setValue("Series", card.Series);
-        // }}
+        setSelectedCard={(card) => {
+          setSelectedCard(card);
+          setValue("CardCode", card.CardCode); // update RHF field
+          setValue("CardName", card.CardName); // fill another field automatically
+          setValue("ContactPerson", card.ContactPerson);
+          setValue("Series", card.Series);
+        }}
         cardloading={cardloading}
         setCardLoading={setCardLoading}
       />

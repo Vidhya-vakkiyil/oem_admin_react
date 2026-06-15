@@ -101,17 +101,17 @@ console.log("filteredList", filteredList);
         accessor: "DocEntry",
       },
       {
-        Header: "Requester Code",
-        accessor: "Requester",
+        Header: "Vendor Code",
+        accessor: "CardCode",
+      },
+     {
+        Header: "Vendor Name",
+        accessor: "CardName",
       },
       {
-        Header: "Document Date ",
-        accessor: "DocDate",
-      },
-      {
-        Header: "Delivery Date",
-        accessor: "DocDueDate",
-      },
+        Header:"Project Code",
+        accessor:"U_PrjCode"
+      }
     ],
     [],
   );
@@ -193,15 +193,15 @@ console.log("filteredList", filteredList);
             </FlexBox>
             <FlexBox direction="Column">
               {" "}
-              <Label>Requester Code</Label>
+              <Label>Vendor Code</Label>
               <ComboBox
                 filter
-                value={inputValue?.Requester || ""}
-                onChange={(e) => handleFilterChange(e, "Requester")}
-                placeholder="Search Requester..."
+                value={inputValue?.CardCode || ""}
+                onChange={(e) => handleFilterChange(e, "CardCode")}
+                placeholder="Search CardCode..."
               >
                 {originalporequestList?.map((data, idx) => (
-                  <ComboBoxItem key={idx} text={data.Requester} />
+                  <ComboBoxItem key={idx} text={data.CardCode} />
                 ))}
               </ComboBox>
             </FlexBox>

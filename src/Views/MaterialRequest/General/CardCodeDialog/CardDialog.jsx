@@ -212,7 +212,15 @@ const CardDialog = ({
             onRowSelect={handleSelectionChange}
             selectionBehavior="RowOnly"
             scaleWidthMode="Grow"
-            
+            loading={cardloading}
+                          showOverlay={cardloading}
+                          noDataText={
+                            cardloading ? (
+                              <BusyIndicator active size="M" />
+                            ) : (
+                              "No Data Found"
+                            )
+                          }
             visibleRows={6}
             style={{
               border: "1px solid #ccc",

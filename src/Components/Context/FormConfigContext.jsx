@@ -406,6 +406,28 @@ const FormConfigProvider = ({ children }) => {
     },
     
   ];
+  const UOMPopupFilterList=[
+     {
+      FieldName: "Code",
+      DisplayName: "Code",
+      DataType: "nvarchar(50)",
+      inputType: "select",
+      Position: "Header",
+      DisplayType: "Left",
+      field_order: "1",
+      is_visible: "1",
+    },
+    {
+      FieldName: "Name",
+      DisplayName: "Name",
+      DataType: "nvarchar(50)",
+      inputType: "select",
+      Position: "Header",
+      DisplayType: "Left",
+      field_order: "1",
+      is_visible: "1",
+    },
+  ];
   const profitcentrePopupFilterList=[
 {
       FieldName: "CenterCode",
@@ -610,6 +632,8 @@ const FormConfigProvider = ({ children }) => {
     { Header: "Discount", accessor: "discount", type: "number" },
     { Header: "Gross Total", accessor: "grosstotal", type: "number" },
     { Header: "Project", accessor: "project", type: "text" },
+    { Header: "UOM", accessor: "UOMCode", type: "text" },
+    
     { Header: "Warehouse", accessor: "warehouse", type: "text" },
 
   ];
@@ -744,6 +768,8 @@ const FormConfigProvider = ({ children }) => {
     { Header: "Discount", accessor: "discount", type: "number" },
     { Header: "Gross Total", accessor: "grosstotal", type: "number" },
  { Header: "Project", accessor: "project", type: "text" },
+ { Header: "UOM", accessor: "UOMCode", type: "text" },
+
     { Header: "Warehouse", accessor: "warehouse", type: "text" },
   ];
   const fieldConfig = [
@@ -1164,6 +1190,7 @@ const FormConfigProvider = ({ children }) => {
         customerpopupFilter,
         ItemPopupFilterList,
         projectPopupFilterList,
+        UOMPopupFilterList,
         warehousePopupFilterList,
         profitcentrePopupFilterList,
         taxPopupFilterList,

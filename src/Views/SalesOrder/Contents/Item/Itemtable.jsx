@@ -44,6 +44,7 @@ import "@ui5/webcomponents-icons/dist/navigation-right-arrow.js"; // or arrow-ri
 import TaxDialog from "../TaxPopup/TaxDialog";
 import WarehouseDialog from "../WarehousePopup/WarehouseDialog";
 import ProfitCenterDialog from "../ProfitCenterPopup/ProfitCenter";
+import UOMDialog from "../UOMPopup/UOMDialog";
 
 const Itemtable = (props) => {
   const {
@@ -77,6 +78,10 @@ const Itemtable = (props) => {
     setProjectData,
     originalProjectData,
     setOriginalProjectData,
+    UOMData,
+    setUOMData,
+    originalUOMData,
+    setOriginalUOMData,
     originalWarehouseData,
     setoriginalWarehouseData,
     originalProfitCenterData,
@@ -140,6 +145,8 @@ const Itemtable = (props) => {
   const [isTaxDialogOpen, setisTaxDialogOpen] = useState(false);
   const [isProjectDialogOpen, setisProjectDialogOpen] = useState(false);
   const [isWarehouseDialogOpen, setisWarehouseDialogOpen] = useState(false);
+ const [isUOMDialogOpen, setisUOMDialogOpen] = useState(false);
+   const [selectedUOMRowIndex, setSelectedUOMRowIndex] = useState("");
 
   const [selectedTaxRowIndex, setSelectedTaxRowIndex] = useState("");
   const [selectedProjectRowIndex, setSelectedProjectRowIndex] = useState("");
@@ -601,6 +608,37 @@ const Itemtable = (props) => {
       clearTaxFilter();
       setSelectedTaxRowIndex(null);
       setisTaxDialogOpen(false);
+    }, 500);
+  };
+   const clearUOMFilter = () => {
+    // Implement clear filter logic here
+    console.log("originalItemData", originalUOMData);
+    setInputValue([]);
+     setUOMData(originalUOMData);
+  };
+    const UOMSelectionRow = (e) => {
+    setitemTableData((prev) =>
+      prev.map((r, idx) =>
+        idx === selectedUOMRowIndex
+          ? { ...r, UOMEntry: e.detail.row.original.AbsEntry, UOMCode: e.detail.row.original.Code, UOMName: e.detail.row.original.Name, }
+          : r,
+      ),
+    );
+    setitemData((prev) =>
+      prev.map((r, idx) =>
+        idx === Number(e.detail.row.id)
+          ? {
+              ...r,
+               UOMEntry: e.detail.row.original.AbsEntry,
+              UOMCode: e.detail.row.original.Code,
+              UOMName: e.detail.row.original.Name,
+            }
+          : r,
+      ),
+    );
+    setTimeout(() => {
+      clearUOMFilter();
+      setisUOMDialogOpen(false);
     }, 500);
   };
   const projectSelectionRow = (e) => {
@@ -1118,6 +1156,31 @@ const Itemtable = (props) => {
         ),
       },
       {
+              Header: "UOM",
+              accessor: "UOMCode",
+              Cell: ({ row }) => (
+                <>
+                  <Input
+                    value={row.original.UOMCode ? row.original.UOMCode : ""}
+                    readonly
+                    disabled={mode === "view"}
+                    style={{ textAlign: "right" }}
+                    onFocus={(e) =>
+                      (e.target.style.borderBottom = "1px solid #007aff")
+                    }
+                    onBlur={(e) => (e.target.style.borderBottom = "1px solid #ccc")}
+                    onClick={() =>
+                      // !row.original.UOM &&
+                      {
+                        setSelectedUOMRowIndex(row.index);
+                        setisUOMDialogOpen(true);
+                      }
+                    }
+                  />
+                </>
+              ),
+            },
+      {
         Header: "Warehouse",
         accessor: "warehouse",
         Cell: ({ row }) => (
@@ -1626,6 +1689,22 @@ const Itemtable = (props) => {
         warehouseSelectionRow={warehouseSelectionRow}
         clearWarehouseFilter={clearWarehouseFilter}
       />
+      <UOMDialog
+              isUOMDialogOpen={isUOMDialogOpen}
+              setisUOMDialogOpen={setisUOMDialogOpen}
+              UOMData={UOMData}
+              setUOMData={setUOMData}
+              originalUOMData={originalUOMData}
+              setOriginalUOMData={setOriginalUOMData}
+              setData={setUOMData}
+              itemdata={itemdata}
+              setitemData={setitemData}
+              setitemTableData={setitemTableData}
+              inputvalue={inputvalue}
+              setInputValue={setInputValue}
+              UOMSelectionRow={UOMSelectionRow}
+              clearUOMFilter={clearUOMFilter}
+            />
       <ProjectDialog
         isProjectDialogOpen={isProjectDialogOpen}
         setisProjectDialogOpen={setisProjectDialogOpen}

@@ -130,6 +130,9 @@ const Contents = (props) => {
   const [addServiceDialogOpen, setAddServicedialogOpen] = useState(false);
   const [taxData, setTaxData] = useState([]);
   const [projectData, setProjectData] = useState([]);
+   const [UOMData, setUOMData] = useState([]);
+    const [originalUOMData, setOriginalUOMData] = useState([]);
+
   const [warehouseData, setWarehouseData] = useState([]);
   const [OwnerList, setOwnerList] = useState([]);
   const [profitCenterData, setProfitCenterData] = useState([]);
@@ -191,6 +194,12 @@ const Contents = (props) => {
 
         setProjectData(user.Projects);
         setOriginalProjectData(user.Projects);
+
+         const uomItem = res?.value?.flatMap((item) => item?.OEM?.UOM || []);
+
+        console.log("uomItem", uomItem);
+        setUOMData(uomItem);
+        setOriginalUOMData(uomItem);
 
         const profitCenterData = await dispatch(
           fetchProfitCenterDetails(),
@@ -918,6 +927,10 @@ const Contents = (props) => {
                         projectData={projectData}
                         setProjectData={setProjectData}
                         originalProjectData={originalProjectData}
+                        UOMData={UOMData}
+                        setUOMData={setUOMData}
+                        originalUOMData={originalUOMData}
+                        setOriginalUOMData={setOriginalUOMData}
                         setOriginalProjectData={setOriginalProjectData}
                         originalWarehouseData={originalWarehouseData}
                         setOriginalWarehouseData={setOriginalWarehouseData}
@@ -996,7 +1009,10 @@ const Contents = (props) => {
                         setFreightData={setFreightData}
                         OwnerList={OwnerList}
                         setOwnerList={setOwnerList}
-                        
+                        UOMData={UOMData}
+                        setUOMData={setUOMData}
+                        originalUOMData={originalUOMData}
+                        setOriginalUOMData={setOriginalUOMData}
                         projectData={projectData}
                         originalProjectData={originalProjectData}
                         setOriginalProjectData={setOriginalProjectData}

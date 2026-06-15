@@ -42,6 +42,7 @@ import TaxDialog from "../TaxPopup/TaxDialog";
 import ProfitCenterDialog from "../ProfitCenterPopup/ProfitCenter";
 import ProjectDialog from "../ProjectPopup/ProjectDialog";
 import WarehouseDialog from "../WarehousePopup/WarehouseDialog";
+import UOMDialog from "../UOMPopup/UOMDialog";
 
 const Servicetable = (props) => {
   const {
@@ -75,6 +76,10 @@ const Servicetable = (props) => {
     originalProjectData,
     setOriginalProjectData,
     setProjectData,
+   UOMData,
+    setUOMData,
+    originalUOMData,
+    setOriginalUOMData,
     warehouseData,
     setWarehouseData,
     setisProfitCenterDialogOpen,
@@ -138,6 +143,8 @@ const Servicetable = (props) => {
   const [isTaxDialogOpen, setisTaxDialogOpen] = useState(false);
   const [isProjectDialogOpen, setisProjectDialogOpen] = useState(false);
   const [isWarehouseDialogOpen, setisWarehouseDialogOpen] = useState(false);
+ const [isUOMDialogOpen, setisUOMDialogOpen] = useState(false);
+   const [selectedUOMRowIndex, setSelectedUOMRowIndex] = useState("");
 
   const [inputvalue, setInputValue] = useState({});
   const [selectedTaxRowIndex, setSelectedTaxRowIndex] = useState("");
@@ -554,6 +561,12 @@ const Servicetable = (props) => {
     setInputValue([]);
     setProjectData(originalProjectData);
   };
+  const clearUOMFilter = () => {
+    // Implement clear filter logic here
+    console.log("originalItemData", originalUOMData);
+    setInputValue([]);
+     setUOMData(originalUOMData);
+  };
   const clearTaxFilter = () => {
     // Implement clear filter logic here
     console.log("originalItemData", originalTaxData);
@@ -636,6 +649,30 @@ const Servicetable = (props) => {
     setTimeout(() => {
       clearWarehouseFilter();
       setisWarehouseDialogOpen(false);
+    }, 500);
+  };
+    const UOMSelectionRow = (e) => {
+    setitemTableData((prev) =>
+      prev.map((r, idx) =>
+        idx === selectedUOMRowIndex
+          ? { ...r, UOMCode: e.detail.row.original.Code, UOMName: e.detail.row.original.Name }
+          : r,
+      ),
+    );
+    setitemData((prev) =>
+      prev.map((r, idx) =>
+        idx === Number(e.detail.row.id)
+          ? {
+              ...r,
+              UOMCode: e.detail.row.original.Code,
+              UOMName: e.detail.row.original.Name,
+            }
+          : r,
+      ),
+    );
+    setTimeout(() => {
+      clearUOMFilter();
+      setisUOMDialogOpen(false);
     }, 500);
   };
   const profitCenterSelectionRow = (e) => {
@@ -1008,6 +1045,31 @@ const Servicetable = (props) => {
           </>
         ),
       },
+        {
+              Header: "UOM",
+              accessor: "UOMCode",
+              Cell: ({ row }) => (
+                <>
+                  <Input
+                    value={row.original.UOMCode ? row.original.UOMCode : ""}
+                    readonly
+                    disabled={mode === "view"}
+                    style={{ textAlign: "right" }}
+                    onFocus={(e) =>
+                      (e.target.style.borderBottom = "1px solid #007aff")
+                    }
+                    onBlur={(e) => (e.target.style.borderBottom = "1px solid #ccc")}
+                    onClick={() =>
+                      // !row.original.UOM &&
+                      {
+                        setSelectedUOMRowIndex(row.index);
+                        setisUOMDialogOpen(true);
+                      }
+                    }
+                  />
+                </>
+              ),
+            },
       {
         Header: "Warehouse",
         accessor: "warehouse",
@@ -1513,6 +1575,22 @@ const Servicetable = (props) => {
         projectSelectionRow={projectSelectionRow}
         clearProjectFilter={clearProjectFilter}
       />
+      <UOMDialog
+              isUOMDialogOpen={isUOMDialogOpen}
+              setisUOMDialogOpen={setisUOMDialogOpen}
+              UOMData={UOMData}
+              setUOMData={setUOMData}
+              originalUOMData={originalUOMData}
+              setOriginalUOMData={setOriginalUOMData}
+              setData={setUOMData}
+              itemdata={itemdata}
+              setitemData={setitemData}
+              setitemTableData={setitemTableData}
+              inputvalue={inputvalue}
+              setInputValue={setInputValue}
+              UOMSelectionRow={UOMSelectionRow}
+              clearUOMFilter={clearUOMFilter}
+            />
       <TaxDialog
         isTaxDialogOpen={isTaxDialogOpen}
         setisTaxDialogOpen={setisTaxDialogOpen}

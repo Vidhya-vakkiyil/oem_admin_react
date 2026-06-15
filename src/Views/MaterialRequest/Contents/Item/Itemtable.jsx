@@ -45,6 +45,7 @@ import TaxDialog from "../TaxPopup/TaxDialog";
 import WarehouseDialog from "../WarehousePopup/WarehouseDialog";
 import ProfitCenterDialog from "../ProfitCenterPopup/ProfitCenter";
 import { useLocation } from "react-router-dom";
+import UOMDialog from "../UOMPopup/UOMDialog";
 
 const Itemtable = (props) => {
   const {
@@ -86,6 +87,11 @@ const Itemtable = (props) => {
     setProjectData,
     originalProjectData,
     setOriginalProjectData,
+    UOMData,
+    setUOMData,
+    originalUOMData,
+    setOriginalUOMData,
+
     originalWarehouseData,
     setoriginalWarehouseData,
     originalProfitCenterData,
@@ -155,9 +161,12 @@ const Itemtable = (props) => {
   const [isTaxDialogOpen, setisTaxDialogOpen] = useState(false);
   const [isProjectDialogOpen, setisProjectDialogOpen] = useState(false);
   const [isWarehouseDialogOpen, setisWarehouseDialogOpen] = useState(false);
+  const [isUOMDialogOpen, setisUOMDialogOpen] = useState(false);
+   const [selectedUOMRowIndex, setSelectedUOMRowIndex] = useState("");
 
   const [selectedTaxRowIndex, setSelectedTaxRowIndex] = useState("");
   const [selectedProjectRowIndex, setSelectedProjectRowIndex] = useState("");
+ 
   const [selectedWarehouseRowIndex, setSelectedWarehouseRowIndex] =
     useState("");
 
@@ -229,23 +238,24 @@ const Itemtable = (props) => {
     setSummaryData((prev) => ({
       ...prev,
       RequestorCode: selectedUserId,
+      UserCode:userList?userList[0]?.UserCode:"",
       RequestorName: userList ? userList[0]?.UserName : "",
       eMail: userList ? userList[0]?.eMail : "",
       Department: userList ? userList[0]?.Department : "",
     }));
   };
   const handlechangeUser = (e) => {
-    const selectedUserId = Number(e.target.value || e.detail?.selectedOption?.value);
+    const selectedUserId = String(e.target.value || e.detail?.selectedOption?.value);
 
     const selectedUser = userList.find(
-      (user) => user.InternalKey === selectedUserId,
+      (user) => user.UserCode === selectedUserId,
     );
 
     console.log(selectedUserId, selectedUser);
 
     setSummaryData((prev) => ({
       ...prev,
-      InternalKey: selectedUser?.InternalKey ?? "",
+      UserCode: selectedUser?.UserCode ?? "",
       RequestorName: selectedUser?.UserName ?? "",
       eMail: selectedUser?.eMail ?? "",
       Department: selectedUser?.Department ?? "",
@@ -603,6 +613,12 @@ const Itemtable = (props) => {
     setInputValue([]);
     setProjectData(originalProjectData);
   };
+  const clearUOMFilter = () => {
+    // Implement clear filter logic here
+    console.log("originalItemData", originalUOMData);
+    setInputValue([]);
+     setUOMData(originalUOMData);
+  };
   const clearTaxFilter = () => {
     // Implement clear filter logic here
     console.log("originalItemData", originalTaxData);
@@ -671,6 +687,32 @@ const Itemtable = (props) => {
       setisProjectDialogOpen(false);
     }, 500);
   };
+  const UOMSelectionRow = (e) => {
+    setitemTableData((prev) =>
+      prev.map((r, idx) =>
+        idx === selectedUOMRowIndex
+          ? { ...r,  UOMEntry: e.detail.row.original.AbsEntry,UOMCode: e.detail.row.original.Code, UOMName: e.detail.row.original.Name }
+          : r,
+      ),
+    );
+    setitemData((prev) =>
+      prev.map((r, idx) =>
+        idx === Number(e.detail.row.id)
+          ? {
+              ...r,
+              UOMEntry: e.detail.row.original.AbsEntry,
+              UOMCode: e.detail.row.original.Code,
+              UOMName: e.detail.row.original.Name,
+            }
+          : r,
+      ),
+    );
+    setTimeout(() => {
+      clearUOMFilter();
+      setisUOMDialogOpen(false);
+    }, 500);
+  };
+
   const warehouseSelectionRow = (e) => {
     setitemTableData((prev) =>
       prev.map((r, idx) =>
@@ -897,11 +939,11 @@ const Itemtable = (props) => {
       },
       {
         Header: "UOM",
-        accessor: "uom",
+        accessor: "UOMCode",
         Cell: ({ row }) => (
           <>
             <Input
-              value={row.original.uom ? row.original.uom : ""}
+              value={row.original.UOMCode ? row.original.UOMCode : ""}
               readonly
               disabled={mode === "view"}
               style={{ textAlign: "right" }}
@@ -909,13 +951,13 @@ const Itemtable = (props) => {
                 (e.target.style.borderBottom = "1px solid #007aff")
               }
               onBlur={(e) => (e.target.style.borderBottom = "1px solid #ccc")}
-              // onClick={() =>
-              //   // !row.original.UOM &&
-              //   {
-              //     setSelectedProjectRowIndex(row.index);
-              //     setisProjectDialogOpen(true);
-              //   }
-              // }
+              onClick={() =>
+                // !row.original.UOM &&
+                {
+                  setSelectedUOMRowIndex(row.index);
+                  setisUOMDialogOpen(true);
+                }
+              }
             />
           </>
         ),
@@ -1295,19 +1337,22 @@ const Itemtable = (props) => {
       //     </>
       //   ),
       // },
-      ...(location?.state?.formname === "Purchase Request"
+      ...(formName=== "Purchase Request"
         ? [
             {
               Header: "Required Date",
-              accessor: "requiredDate",
+              //accessor: "requiredDate",
               Cell: ({ row }) => (
                 <Input
                   value={
-                    formData.requiredDate
-                      ? formData.requiredDate
-                      : row.original.requiredDate
+                    row.original.requiredDate
+                      ?  new Date(row.original.requiredDate)
+              .toISOString()
+              .split("T")[0]
+              .replace(/--/g, "") 
+                      : formData.RequiredDate
                   }
-                  type="Date"
+                  type={mode === "view"?"Text":"Date"}
                   disabled={mode === "view"}
                   style={{ textAlign: "right" }}
                   onFocus={(e) =>
@@ -1342,7 +1387,7 @@ const Itemtable = (props) => {
         Cell: ({ row }) => (
           <>
             <Input
-              value={row.original.U_HLB_Rmarks ? row.original.U_HLB_Rmarks : ""}
+              value={row.original.remarks ? row.original.remarks : ""}
               disabled={mode === "view"}
               type="Text"
               style={{ textAlign: "right" }}
@@ -1574,8 +1619,9 @@ const Itemtable = (props) => {
             userList,
             summaryData?.RequestorName,
           )}
+          {console.log("formName",formName)}
           {/* Requestor Code */}
-          {formName !== "Goods Issue" && (
+          {formName !== "GRPO" &&(
             <FlexBox alignItems="Center" style={{ gap: "1rem" }}>
               <Text style={{ width: "140px" }}>Requestor Code</Text>
 
@@ -1586,8 +1632,8 @@ const Itemtable = (props) => {
                 onChange={handlechangerequestor}
               >
                 <Option value="">Select Type</Option>
-                <Option value="1">User</Option>
-                <Option value="2">Employee</Option>
+                <Option value="U">User</Option>
+                <Option value="E">Employee</Option>
               </Select>
 
               {/* <Input
@@ -1598,20 +1644,20 @@ const Itemtable = (props) => {
             </FlexBox>
           )}
           {/* Requestor Name */}
-          {formName !== "Goods Issue" && (
+          {formName !== "GRPO" &&(
             <FlexBox alignItems="Center" style={{ gap: "1rem" }}>
               <Text style={{ width: "140px" }}>Requestor Name</Text>
               <Select
                 disabled={mode === "view"}
                 style={{ width: "200px" }}
-                value={summaryData?.InternalKey}
+                value={String(summaryData?.UserCode)}
                 onChange={handlechangeUser}
               >
                 <Option value="">Select Requestor</Option>
-                {summaryData?.RequestorCode === "1"
+                {summaryData?.RequestorCode === "U"
                   ? userList.length > 0 &&
                     userList.map((user) => (
-                      <Option key={user.InternalKey} value={user.InternalKey}>
+                      <Option key={user.InternalKey} value={user.UserCode}>
                         {user.UserName}
                       </Option>
                     ))
@@ -1625,7 +1671,7 @@ const Itemtable = (props) => {
             </FlexBox>
           )}
           {/* Department */}
-          {formName !== "Goods Issue" && (
+          {formName !== "GRPO"&&(
             <FlexBox alignItems="Center" style={{ gap: "1rem" }}>
               <Text style={{ width: "140px" }}>Department</Text>
 
@@ -1642,8 +1688,28 @@ const Itemtable = (props) => {
                 style={{ width: "200px" }}
               />
             </FlexBox>
-          )}
+          )}{console.log("OwnerList",OwnerList)}
+          {formName === "GRPO" &&(
+            <FlexBox alignItems="Center" style={{ gap: "1rem" }}>
+              <Text style={{ width: "140px" }}>Owner</Text>
+
+              <Input
+                disabled={mode === "view"}
+                value={
+                 selectedItemOwner
+                    ? employeeList?.find(
+                        (owner) => owner.EmployeeID === Number(selectedItemOwner),
+                      )?.FirstName || ""
+                    : employeeList?.find((owner) => owner.EmployeeID === 1)?.FirstName
+                }
+                placeholder="Department"
+                style={{ width: "200px" }}
+              />
+            </FlexBox>
+          )
+        }
         </FlexBox>
+        
       </FlexBox>
       <Dialog
         headerText="Select Item"
@@ -1711,6 +1777,22 @@ const Itemtable = (props) => {
         setInputValue={setInputValue}
         warehouseSelectionRow={warehouseSelectionRow}
         clearWarehouseFilter={clearWarehouseFilter}
+      />
+      <UOMDialog
+        isUOMDialogOpen={isUOMDialogOpen}
+        setisUOMDialogOpen={setisUOMDialogOpen}
+        UOMData={UOMData}
+        setUOMData={setUOMData}
+        originalUOMData={originalUOMData}
+        setOriginalUOMData={setOriginalUOMData}
+        setData={setUOMData}
+        itemdata={itemdata}
+        setitemData={setitemData}
+        setitemTableData={setitemTableData}
+        inputvalue={inputvalue}
+        setInputValue={setInputValue}
+        UOMSelectionRow={UOMSelectionRow}
+        clearUOMFilter={clearUOMFilter}
       />
       <ProjectDialog
         isProjectDialogOpen={isProjectDialogOpen}

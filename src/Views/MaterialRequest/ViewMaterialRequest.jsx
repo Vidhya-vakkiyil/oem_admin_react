@@ -89,6 +89,8 @@ const ViewMaterialRequest = () => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState("Item");
   const [currencyType, setCurrencyType] = useState("GBP");
+    const { userList } = useSelector((state) => state.materialRequests);
+  
 
   const [attachmentsList, setAttachmentsList] = useState([]);
 
@@ -232,9 +234,9 @@ const ViewMaterialRequest = () => {
             RequisitionTime: orderListById.U_ReqTime || "",
             RequiredDate: orderListById.U_ReqDate ||orderListById.RequriedDate,
             CusCode: orderListById.U_CardCode||orderListById.CardCode,
-            ProjectCode: orderListById.U_PrjCode||orderListById.ProjectCode,
+            ProjectCode: orderListById.U_PrjCode||orderListById.ProjectCode,          
             ProjectName: orderListById.U_PrjDesc,
-            Remarks: orderListById.U_Remark,
+            Remarks: orderListById.U_Remark||orderListById.Comments,
             CusName: orderListById.U_CardName||orderListById.CardName,
           });
           // 2. Merge document lines into orderItems
@@ -255,14 +257,15 @@ const ViewMaterialRequest = () => {
                     return matched !== undefined
                       ? {
                           task: matched.U_Task||matched.Task,
-                          BoqLineNum: matched.U_SQlineNum||matched.SQlineNum,
+                          BoqLineNum: matched.U_SQlineNum||matched.LineNum,
                           ItemCode: matched.U_ItmSerCode||matched.ItemCode,
-                          ItemName: matched.U_ItemType||matched.ItemDescription,
-                          fulldescription: matched.U_ItemDesc||matched.ItemDescription,
+                          ItemName: matched.U_ItemDesc||matched.ItemDescription,
+                          fulldescription: matched.U_SerDesc||matched.U_HLB_FullDesc,
                           quantity: matched.U_ReqQty||matched.Quantity,
                           amount: matched.U_UnitPrice||matched.UnitPrice,
                           linetotal: matched.U_LineTotal||matched.LineTotal,
                           project: matched.U_Project||matched.ProjectCode,
+                UOMCode: matched.U_UOM||matched.UoMCode,
                           warehouse: matched.U_Whs||matched.Warehouse||matched.WarehouseCode,
                           uom: matched.U_UOM||matched.UoMCode,
                           stage: matched.U_Stage||matched.StgDesc,
@@ -270,25 +273,29 @@ const ViewMaterialRequest = () => {
                           inStock: matched.U_InStock||matched.InStock,
                           availableQty: matched.U_AvlQty||matched.AvlQty,
                           rateTotal: matched.U_RateTotal||matched.Rate,
+                requiredDate:matched.RequiredDate,
+
                           remarks: matched.U_HLB_Rmarks||matched.Remarks,
                         }
                       : {
                          task: item.U_Task||item.Task, // usually LineNum is 0-based
-                          BoqLineNum: item.U_SQlineNum||item.SQlineNum,
+                          BoqLineNum: item.U_SQlineNum||item.LineNum,
                           ItemCode: item.U_ItmSerCode||item.ItemCode,
-                          ItemName: item.U_ItemType||item.ItemDescription,
-                          fulldescription: item.U_ItemDesc||item.ItemDescription,
+                           ItemName: item.U_ItemDesc||item.ItemDescription,
+                          fulldescription: item.U_SerDesc||item.U_HLB_FullDesc,
                           quantity: item.U_ReqQty||item.Quantity,
                           amount: item.U_UnitPrice||item.UnitPrice,
                           linetotal: item.U_LineTotal||item.LineTotal,
                           project: item.U_Project||item.ProjectCode,
+                UOMCode: item.U_UOM||item.UoMCode,
                           warehouse: item.U_Whs||item.Warehouse||item.WarehouseCode,
-                          uom: item.U_UOM||item.UoMCode,
                           stage: item.U_Stage||item.StgDesc,
                           issuedQty: item.U_IssuedQty||item.IssuedQty,
                           inStock: item.U_InStock||item.InStock,
                           availableQty: item.U_AvlQty||item.AvlQty,
                           rateTotal: item.U_RateTotal||item.Rate,
+                requiredDate:item.RequiredDate,
+
                           remarks: item.U_HLB_Rmarks||item.Remarks,
                         }; // no placeholder
                   })
@@ -306,40 +313,44 @@ const ViewMaterialRequest = () => {
                     return matched !== undefined
                       ? {
                          task: matched.U_Task||matched.Task, // usually LineNum is 0-based
-                          BoqLineNum: matched.LineId||matched.SQlineNum,
+                          BoqLineNum: matched.LineId||matched.LineNum,
                           ItemCode: matched.U_ItmSerCode||matched.ItemCode,
-                          ItemName: matched.U_ItemType||matched.ItemDescription,
-                          fulldescription: matched.U_ItemDesc||matched.ItemDescription,
+                           ItemName: matched.U_ItemDesc||matched.ItemDescription,
+                          fulldescription: matched.U_SerDesc||matched.U_HLB_FullDesc,
                           quantity: matched.U_ReqQty||matched.Quantity,
                           amount: matched.U_UnitPrice||matched.UnitPrice,
                           linetotal: matched.U_LineTotal||matched.LineTotal,
                           project: matched.U_Project||matched.ProjectCode,
+                UOMCode: matched.U_UOM||matched.UoMCode,
                           warehouse: matched.U_Whs||matched.Warehouse||matched.WarehouseCode,
-                          uom: matched.U_UOM||matched.UoMCode,
                           stage: matched.U_Stage||matched.StgDesc,
                           issuedQty: matched.U_IssuedQty||matched.IssuedQty,
                           inStock: matched.U_InStock||matched.InStock,
                           availableQty: matched.U_AvlQty||matched.AvlQty,
                           rateTotal: matched.U_RateTotal||matched.Rate,
+                requiredDate:matched.RequiredDate,
+
                           remarks: matched.U_HLB_Rmarks||matched.Remarks,
                         }
                       : {
                            task: item.U_Task||item.Task, // usually LineNum is 0-based
-                          BoqLineNum: item.LineId||item.SQlineNum,
+                          BoqLineNum: item.LineId||item.LineNum,
                           ItemCode: item.U_ItmSerCode||item.ItemCode,
-                          ItemName: item.U_ItemType||item.ItemDescription,
-                          fulldescription: item.U_ItemDesc||item.ItemDescription,
+                           ItemName: item.U_ItemDesc||item.ItemDescription,
+                          fulldescription: item.U_SerDesc||item.U_HLB_FullDesc,
                           quantity: item.U_ReqQty||item.Quantity,
                           amount: item.U_UnitPrice||item.UnitPrice,
                           linetotal: item.U_LineTotal||item.LineTotal,
                           project: item.U_Project||item.ProjectCode,
+                UOMCode: item.U_UOM||item.UoMCode,
                           warehouse: item.U_Whs||item.Warehouse||item.WarehouseCode,
-                          uom: item.U_UOM||item.UoMCode,
                           stage: item.U_Stage||item.StgDesc,
                           issuedQty: item.U_IssuedQty||item.IssuedQty,
                           inStock: item.U_InStock||item.InStock,
                           availableQty: item.U_AvlQty||item.AvlQty,
                           rateTotal: item.U_RateTotal||item.Rate,
+                requiredDate:item.RequiredDate,
+
                           remarks: item.U_HLB_Rmarks||item.Remarks,
                         }; // no placeholder
                   })
@@ -349,22 +360,23 @@ const ViewMaterialRequest = () => {
             setitemTableData(() =>
               data.map((item, index) => ({
                 task: item.U_Task||item.Task, // usually LineNum is 0-based
-                BoqLineNum: item.LineId||item.SQlineNum,
+                BoqLineNum: item.LineId||item.LineNum,
                 LineId:item.LineId,
                 ItemCode: item.U_ItmSerCode||item.ItemCode,
-                ItemName: item.U_ItemType||item.ItemDescription,
-                fulldescription: item.U_ItemDesc||item.ItemDescription,
+                ItemName: item.U_ItemDesc||item.ItemDescription,
+                          fulldescription: item.U_SerDesc||item.U_HLB_FullDesc,
                 quantity: item.U_ReqQty||item.Quantity,
                 amount: item.U_UnitPrice||item.UnitPrice,
                 linetotal: item.U_LineTotal||item.LineTotal,
                 project: item.U_Project||item.ProjectCode,
+                UOMCode: item.U_UOM||item.UoMCode,
                 warehouse: item.U_Whs||item.Warehouse||item.WarehouseCode,
-                uom: item.U_UOM||item.UoMCode,
                 stage: item.U_Stage||item.StgDesc,
                 issuedQty: item.U_IssuedQty||item.IssuedQty,
                 inStock: item.U_InStock||item.InStock,
                 availableQty: item.U_AvlQty||item.AvlQty,
                 rateTotal: item.U_RateTotal||item.Rate,
+                requiredDate:item.RequiredDate,
                 remarks: item.U_HLB_Rmarks||item.Remarks,
               })),
             );
@@ -394,8 +406,10 @@ const ViewMaterialRequest = () => {
           }
           setSummaryData((prev) => ({
             ...prev,
-            RequestorCode: orderListById.U_ReqCode,
-            RequestorName: orderListById.U_ReqName,
+            RequestorCode: orderListById.U_ReqType||orderListById.ReqType||"U",
+            
+            UserCode:orderListById.U_ReqCode||orderListById.ReqCode||orderListById.Requester,
+            RequestorName: orderListById.U_ReqName||orderListById.RequesterName,
             Department: orderListById.U_Dept,
             DocTotal: orderListById.DocTotal,
             ApprovalStatus: orderListById.U_AppStatus,
@@ -737,7 +751,7 @@ const ViewMaterialRequest = () => {
                 onSubmit={handleSubmit}
                 setFormData={setFormData}
                 formData={formData}
-                formName={"Material Request"}
+                formName={formDetails[0]?.name}
                 defaultValues={formData} // ✅ now passes edit data properly
                 apiError={apiError}
                 pageId={id}
@@ -788,7 +802,7 @@ const ViewMaterialRequest = () => {
                 setRowSelection={setRowSelection}
                 itemdata={itemdata}
                 setitemData={setitemData}
-                formName={"Material Request"}
+                formName={formDetails[0]?.name}
                 formData={formData}
                 setitemTableData={setitemTableData}
                 itemTabledata={itemTabledata}

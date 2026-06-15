@@ -285,6 +285,8 @@ useEffect(() => {
                             amount: matched.UnitPrice,
                             WarehouseCode: matched.WarehouseCode,
                             ProjectCode: matched.ProjectCode,
+                            UOMEntry: matched.UoMEntry,
+                UOMCode: matched.UoMCode,
                             discount: matched.DiscountPercent,
                             TaxRate: matched.TaxPercentagePerRow,
                             "1_ProfitCenterCode": matched.CostingCode,
@@ -302,6 +304,8 @@ useEffect(() => {
                             TaxCode: item.TaxCode,
                             WarehouseCode: item.WarehouseCode,
                             ProjectCode: item.ProjectCode,
+                            UOMEntry: item.UoMEntry,
+                UOMCode: item.UoMCode,
                             amount: item.UnitPrice,
                             discount: item.DiscountPercent,
                             TaxRate: item.TaxPercentagePerRow,
@@ -333,6 +337,8 @@ useEffect(() => {
                             TaxCode: matched.TaxCode,
                             WarehouseCode: matched.WarehouseCode,
                             ProjectCode: matched.ProjectCode,
+                            UOMEntry: matched.UoMEntry,
+                UOMCode: matched.UoMCode,
                             amount: matched.UnitPrice,
                             discount: matched.DiscountPercent,
                             TaxRate: matched.TaxPercentagePerRow,
@@ -357,6 +363,8 @@ useEffect(() => {
                   TaxCode: line.TaxCode,
                   WarehouseCode: line.WarehouseCode,
                   ProjectCode: line.ProjectCode,
+                  UOMEntry: line.UoMEntry,
+                UOMCode: line.UoMCode,
                   amount: line.UnitPrice,
                   discount: line.DiscountPercent,
                   TaxRate: line.TaxPercentagePerRow,
@@ -403,6 +411,8 @@ useEffect(() => {
                             TaxRate: matched.TaxPercentagePerRow,
                             WarehouseCode: matched.WarehouseCode,
                             ProjectCode: matched.ProjectCode,
+                            UOMEntry: matched.UoMEntry,
+                            UOMCode: matched.UoMCode,
                             "1_ProfitCenterCode": matched.CostingCode,
                             "2_ProfitCenterCode": matched.CostingCode2,
 
@@ -421,6 +431,8 @@ useEffect(() => {
                             TaxRate: item.TaxPercentagePerRow,
                             WarehouseCode: item.WarehouseCode,
                             ProjectCode: item.ProjectCode,
+                            UOMEntry: item.UoMEntry,
+                            UOMCode: item.UoMCode,
                             "1_ProfitCenterCode": item.CostingCode,
                             "2_ProfitCenterCode": item.CostingCode2,
 
@@ -452,6 +464,9 @@ useEffect(() => {
                             TaxRate: matched.TaxPercentagePerRow,
                             WarehouseCode: matched.WarehouseCode,
                             ProjectCode: matched.ProjectCode,
+                            UOMEntry: matched.UoMEntry,
+                            UOMCode: matched.UoMCode,
+
                             "1_ProfitCenterCode": matched.CostingCode,
                             "2_ProfitCenterCode": matched.CostingCode2,
 
@@ -480,6 +495,8 @@ useEffect(() => {
                   "3_ProfitCenterCode": line.CostingCode3,
                   "4_ProfitCenterCode": line.CostingCode4,
                   "5_ProfitCenterCode": line.CostingCode5,
+                  UOMEntry: line.UoMEntry,
+                  UOMCode: line.UoMCode,
                 })),
               );
               if (serviceList.value?.length > 0) {

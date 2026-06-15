@@ -632,6 +632,8 @@ export default function SalesOrder() {
             UnitPrice: Number(line.amount),
             WarehouseCode: line.WarehouseCode,
             ProjectCode: line.ProjectCode,
+                        UoMEntry: line.UOMEntry || null,
+            UoMCode: line.UOMCode,
             TaxCode: line.TaxCode,
             VatGroup: line.TaxCode,
             DiscountPercent: Number(line.discount),
@@ -726,6 +728,8 @@ export default function SalesOrder() {
             UnitPrice: Number(line.amount),
             WarehouseCode: line.WarehouseCode,
             ProjectCode: line.ProjectCode,
+            UoMEntry: line.UOMEntry || null,
+            UoMCode: line.UOMCode,
             TaxCode: line.TaxCode,
             VatGroup: line.TaxCode,
             DiscountPercent: Number(line.discount),
@@ -805,7 +809,7 @@ export default function SalesOrder() {
       } else if (formDetails[0]?.name === "Sales Quotation") {
         res = await dispatch(createSalesQuotation(formDataToSend)).unwrap();
       } else if (formDetails[0]?.name === "Purchase Order") {
-        //dispatch(createPurchaseOrder(formDataToSend)).unwrap();
+        dispatch(createPurchaseOrder(formDataToSend)).unwrap();
         res = await dispatch(createPurchaseOrder(formDataToSend)).unwrap();
       } else if (formDetails[0]?.name === "Purchase Quotation") {
         res = await dispatch(createPurchaseQuotation(formDataToSend)).unwrap();

@@ -90,6 +90,7 @@ export default function CloneMaterialRequest() {
   const navigate = useNavigate();
   const { orderItems } = useSelector((state) => state.orderItems);
   const { warehousesdetails } = useSelector((state) => state.salesadddetails);
+ const { userList } = useSelector((state) => state.materialRequests);
   const [apiError, setApiError] = useState(null);
   const { formId, pageId } = useParams();
   const user = useSelector((state) => state.auth.user);
@@ -222,8 +223,9 @@ export default function CloneMaterialRequest() {
               amount: item.amount || 0,
               linetotal: item.linetotal || 0,
               project: item.project || "",
+              UOMEntry:item.UOMEntry||"",
+            UOMCode: item.UOMCode,
               warehouse: item.warehouse || "",
-              uom: item.uom || "",
               stage: item.stage || "",
               issuedQty: item.issuedQty || 0,
               inStock: item.inStock || 0,
@@ -240,10 +242,11 @@ export default function CloneMaterialRequest() {
         // Summary Data
         setSummaryData((prev) => ({
           ...prev,
-          RequestorCode: orderListById.RequestorCode || "",
-          RequestorName: orderListById.RequestorName || "",
+          RequestorCode: orderListById.RequestorCode ||orderListById.U_ReqType|| "",
+          UserCode:orderListById.UserCode||orderListById.U_ReqCode,
+          RequestorName: orderListById.RequestorName || orderListById.U_ReqName,
           eMail: orderListById.eMail || "",
-          Department: orderListById.Department || "",
+          Department: orderListById.Department || orderListById.U_Dept,
           DocTotal: orderListById.DocTotal || 0,
           ApprovalStatus: orderListById.ApprovalStatus || "",
           ApprovedBy: orderListById.ApprovedBy || "",
@@ -354,31 +357,36 @@ export default function CloneMaterialRequest() {
           ? new Date(date).toISOString().split("T")[0].replace(/-/g, "")
           : new Date().toISOString().split("T")[0].replace(/-/g, "");
       const documentLines = Object.values(itemTabledata).map((line, index) => ({
-      
+      LineNum:line.BoqLineNum,
         ItemCode: line.ItemCode || "", // "ERM00001","A00001",
         ItemDescription: line.ItemName || "",
+        U_HLB_FullDesc:line.fulldescription,
         Quantity: Number(line.quantity || 0),
         UnitPrice: Number(line.amount || 0),
        // TaxCode: line.TaxCode || "E2",
         //VatGroup: line.TaxCode || "E2",
         WarehouseCode:
           line.warehouse || warehousesdetails?.value?.[0]?.WarehouseCode,
-       // ProjectCode: formData.ProjectCode || "",
+        ProjectCode: formData.ProjectCode || "",
+        UoMEntry:line.UOMEntry,
+        UoMCode: line.UOMCode,
         DiscountPercent: Number(line.discount || 0),
         U_MRDocEntry: formData.docEntry,
         U_MRDocNo: formData.docNum || "",
         U_MRLine: line.BoqLineNum,
-        LineTotal: null,
-        CostingCode: null,
-        CostingCode2: null,
-        CostingCode3: null,
-        CostingCode4: null,
-        CostingCode5: null,
+        
         RequiredDate: line.requiredDate,
         U_HLB_Rmarks: line.remarks || "",
       }));
       const payload = {
         CardCode: formData.CusCode || "",
+        U_PrjCode: formData.ProjectCode || "",
+        U_PrjDesc: formData.ProjectName || "",
+        Comments: formData.Remarks || "",
+         ReqType: summaryData.RequestorCode,
+        ReqCode: summaryData.UserCode || "",
+        ReqName: summaryData.RequestorName,
+        U_Dept: summaryData.Department || "",
         DocDate: formatDate(formData.RequisitionDate),
         DocDueDate: formatDate(formData.DocDueDate),
         //TaxDate: formatDate(formData.TaxDate),
@@ -413,6 +421,7 @@ export default function CloneMaterialRequest() {
         DocumentLines: JSON.stringify(documentLines) || [],
         DocTotal: 65000,
          U_MRNo: formData.docEntry,
+         U_OEM_UEMAIL:null,
         Rounding: summaryData.Rounding || "tNO",
         // RoundingDiffAmount: Number(summaryData.RoundingDiffAmount || 0),
         // DiscountPercent: Number(summaryData.DiscountPercent || 0),
@@ -466,7 +475,9 @@ export default function CloneMaterialRequest() {
             UnitPrice: Number(line.amount || 0),
             WarehouseCode:
               line.warehouse || warehousesdetails.value[0]?.WarehouseCode,
-            //ProjectCode: line.project || "",
+            ProjectCode: line.project || "",
+            UoMEntry: line.UOMEntry || null,
+            UoMCode: line.UOMCode,
             TaxCode: line.TaxCode || "",
             VatGroup: line.TaxCode || "",
             DiscountPercent: Number(line.discount || 0),
@@ -561,6 +572,8 @@ export default function CloneMaterialRequest() {
           U_UOM: item.UOM,
           U_InStock: item.inStock || 0,
           U_Project: item.project || "",
+          UoMEntry: item.UOMEntry || null,
+            UoMCode: item.UOMCode,
           U_Stage: item.stage || "",
           U_UnitPrice: item.amount || 0,
           U_LineTotal: item.quantity * item.amount || 0,

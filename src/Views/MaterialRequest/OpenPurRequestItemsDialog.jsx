@@ -91,8 +91,8 @@ console.log("filteredList", filteredList);
      () => [
       {
         Header: "Line Id",
-        accessor: "LineId", // not used for data, but needed for the column
-        Cell: ({ row }) => Number(row.id) + 1, // ✅ row.id is 0-based
+        accessor: "BoqLineNum", // not used for data, but needed for the column
+        //Cell: ({ row }) => Number(row.id) + 1, // ✅ row.id is 0-based
         width: 80,
       },
       {
@@ -123,8 +123,8 @@ console.log("filteredList", filteredList);
       },
 
       {
-        Header: "Item Description",
-        accessor: "U_Desc",
+        Header: "Full Description",
+        accessor: "fulldescription",
       },
     ],
     [],
@@ -189,12 +189,12 @@ console.log("filteredList", filteredList);
                         <Label>Item Full Description</Label>
                         <ComboBox
                           filter
-                          value={inputValue.ItemName || ""}
-                          onChange={(e) => handleFilterChange(e, "ItemName")}
+                          value={inputValue.fulldescription || ""}
+                          onChange={(e) => handleFilterChange(e, "fulldescription")}
                           placeholder="Search Item Description..."
                         >
                           {originalSelectedPurRequestList?.map((data, idx) => (
-                            <ComboBoxItem key={idx} text={String(data.ItemName)} />
+                            <ComboBoxItem key={idx} text={String(data.fulldescription)} />
                           ))}
                         </ComboBox>
                       </FlexBox>
